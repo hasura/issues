@@ -1,0 +1,16 @@
+{
+  "name": "issues",
+  "version": "0.1.0",
+  "description": "Issue tracking across projects, across repos",
+  "main": "index.js",
+  "scripts": {
+    "server": "node server.js"
+  },
+  "author": "Tanmai Gopal",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.13.4",
+    "mustache": "^2.2.1",
+    "node-fetch": "^1.5.3"
+  }
+}
