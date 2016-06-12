@@ -24,15 +24,26 @@ if (projects.gitlab && !GITLAB) {
 
 app.use(express.static('/app/static'));
 
+const issueCompare = (a, b) => {
+  if (a.noIssues < b.noIssues) {
+    return 1;
+  }
+  if (a.noIssues > b.noIssues) {
+    return -1;
+  }
+  return 0;
+};
+
 app.get('/milestone', (req, res) => {
-  if (projects.gitlab && projects.gitlab.length > 0) {
+  if ((projects.gitlab && projects.gitlab.length > 0) || (projects.github && projects.github.length > 0)) {
     console.log("Fetching from gitlab: " + JSON.stringify(projects.gitlab));
 
     const gitlabIssues = [];
     let totalGitlab = 0;
     const gitlabPromises = projects.gitlab.map((p, i) => {
       const promise = new Promise((resolve, reject) => {
-        fetch(`https://gitlab.com/api/v3/projects/${p.replace('/','%2F')}/issues?milestone=${req.query.gitlab}&state=opened`,
+        // fetch(`https://gitlab.com/api/v3/projects/${p.replace('/','%2F')}/issues?milestone=${req.query.gitlab}&state=opened`,
+        fetch('http://192.168.99.100:7031/gitlab',
           { headers: {
             'Content-Type': 'application/json',
             'PRIVATE-TOKEN': `${GITLAB}`
@@ -40,11 +51,16 @@ app.get('/milestone', (req, res) => {
             (response) => {
               if (response.status >= 200 && response.status < 300) {
                 response.text().then((data) => {
-                  const results = JSON.parse(data);
-                  gitlabIssues.push({project: p, projectNo: i, noIssues: results.length, issues: results});
-                  totalGitlab += results.length;
-                  // console.log(results);
-                  resolve();
+                  try {
+                    const results = JSON.parse(data);
+                    const milestoneId = (results[0] && results[0].milestone) ? results[0].milestone.iid : null;
+                    gitlabIssues.push({project: p, projectNo: i, noIssues: results.length, issues: results, milestoneId: milestoneId});
+                    totalGitlab += results.length;
+                    resolve();
+                  } catch (err) {
+                    console.log(err.stack);
+                    reject(err.toString());
+                  }
                 });
                 return;
               }
@@ -63,8 +79,8 @@ app.get('/milestone', (req, res) => {
     let totalGithub = 0;
     const githubPromises = projects.github.map((p, i) => {
       const promise = new Promise((resolve, reject) => {
-        console.log(`https://api.github.com/repos/${p}/issues?milestone=${req.query.github}&state=open`);
-        fetch(`https://api.github.com/repos/${p}/issues?milestone=${req.query.github}&state=open`,
+        // fetch(`https://api.github.com/repos/${p}/issues?milestone=${req.query.github}&state=open`,
+        fetch('http://192.168.99.100:7031/github',
           { headers: {
             'Content-Type': 'application/json',
             'Authorization': `token ${GITHUB}`
@@ -72,18 +88,26 @@ app.get('/milestone', (req, res) => {
             (response) => {
               if (response.status >= 200 && response.status < 300) {
                 response.text().then((data) => {
-                  const results = JSON.parse(data);
-                  githubIssues.push({project: p, projectNo: i, noIssues: results.length, issues: results});
-                  totalGithub += results.length;
-                  // console.log(results);
-                  resolve();
+                  try {
+                    const results = JSON.parse(data);
+                    const milestoneUrl = (results[0] && results[0].milestone) ? results[0].milestone.html_url : null;
+                    githubIssues.push({project: p, projectNo: i,
+                      noIssues: results.length,
+                      issues: results,
+                      milestoneUrl: milestoneUrl});
+                    totalGithub += results.length;
+                    resolve();
+                  } catch (err) {
+                    console.log(err.stack);
+                    reject(err.toString());
+                  }
                 });
                 return;
               }
               reject(p + ':: ' + response.status.toString() + ': ' + response.statusText);
             },
             (error) => {
-              reject(p + ':: failed to fetch from gitlab: ' + error.message);
+              reject(p + ':: failed to fetch from github: ' + error.message);
             }
           );
       });
@@ -93,6 +117,10 @@ app.get('/milestone', (req, res) => {
 
     Promise.all(gitlabPromises.concat(githubPromises)).then(
       () => {
+        // Sort according to number of issues
+        gitlabIssues.sort(issueCompare);
+        githubIssues.sort(issueCompare);
+
         // Template this
         console.log('compiling template');
         const output = mustache.render(template.toString(), {

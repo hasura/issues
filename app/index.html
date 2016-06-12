@@ -19,6 +19,16 @@
       .panel-title {
         font-size: 14px;
       }
+      .panel-title a {
+        color: #666;
+        font-size: 0.8em;
+      }
+      a.repo-link {
+        color: #666;
+        font-size: 0.8em;
+        text-decoration: none;
+        font-weight: normal;
+      }
       .panel-footer {
         font-size: 0.8em;
       }
@@ -35,7 +45,8 @@
           <h4>
             <a role="button" data-toggle="collapse" data-parent="#allGitlab" href="#gitlab-{{projectNo}}" aria-expanded="true" aria-controls="gitlab-{{projectNo}}">
               {{project}}  ({{noIssues}})
-            </a>
+            </a>&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;<a target="_blank" href="https://gitlab.com/{{project}}/milestones/{{milestoneId}}" class="repo-link">View on Gitlab</a>
           </h4>
           <div class="container collapse" id="gitlab-{{projectNo}}">
             {{#issues}}
@@ -43,7 +54,10 @@
                 <div class="col-md-6">
                   <div class="panel panel-default">
                     <div class="panel-heading">
-                      <h3 class="panel-title"><span class="grey">#{{iid}}</span>&nbsp; {{title}}</h3>
+                      <h3 class="panel-title">
+                        <span class="grey">#{{iid}}</span>&nbsp; {{title}}
+                        <a target="_blank" href="https://gitlab.com/{{project}}/issues/{{iid}}">View on Gitlab</a></h3>
+                      </h3>
                     </div>
                     <div class="panel-body">
                       <p>{{description}}</p>
@@ -72,7 +86,8 @@
           <h4>
             <a role="button" data-toggle="collapse" data-parent="#allGithub" href="#github-{{projectNo}}" aria-expanded="true" aria-controls="gitlab-{{projectNo}}">
               {{project}}  ({{noIssues}})
-            </a>
+            </a>&nbsp;&nbsp;
+            &nbsp;&nbsp;&nbsp;<a target="_blank" href="{{milestoneUrl}}" class="repo-link">View on Github</a>
           </h4>
           <div class="container collapse" id="github-{{projectNo}}">
             {{#issues}}
@@ -80,7 +95,10 @@
                 <div class="col-md-6">
                   <div class="panel panel-default">
                     <div class="panel-heading">
-                      <h3 class="panel-title"><span class="grey">#{{number}}</span>&nbsp; {{title}}</h3>
+                      <h3 class="panel-title">
+                        <span class="grey">#{{number}}</span>
+                        &nbsp; {{title}} &nbsp;
+                        <a target="_blank" href="{{url}}">View on Github</a>
                     </div>
                     <div class="panel-body">
                       <p>{{body}}</p>
