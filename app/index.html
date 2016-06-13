@@ -39,6 +39,24 @@
   </head>
   <body>
     <div class="container">
+      <h2><u>People</u></h2>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4">
+            <table class="table">
+              <tbody>
+                {{#people}}
+                  <tr>
+                    <td>{{name}}</td>
+                    <td>{{number}}</td>
+                  </tr>
+                {{/people}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <hr/>
       <h2><u>Gitlab ({{totalGitlab}})</u></h2>
       <div class="container" id="allGitlab">
         {{#gitlab}}
@@ -100,7 +118,7 @@
                       <h3 class="panel-title">
                         <span class="grey">#{{number}}</span>
                         &nbsp; {{title}} &nbsp;
-                        <a target="_blank" href="{{url}}">View on Github</a>
+                        <a target="_blank" href="{{html_url}}">View on Github</a>
                     </div>
                     <div class="panel-body">
                       <p>{{body}}</p>

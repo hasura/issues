@@ -38,6 +38,7 @@ app.get('/milestone', (req, res) => {
   if ((projects.gitlab && projects.gitlab.length > 0) || (projects.github && projects.github.length > 0)) {
     console.log("Fetching from gitlab: " + JSON.stringify(projects.gitlab));
 
+    const people = {};
     const gitlabIssues = [];
     let totalGitlab = 0;
     const gitlabPromises = projects.gitlab.map((p, i) => {
@@ -56,6 +57,15 @@ app.get('/milestone', (req, res) => {
                     const milestoneId = (results[0] && results[0].milestone) ? results[0].milestone.iid : null;
                     gitlabIssues.push({project: p, projectNo: i, noIssues: results.length, issues: results, milestoneId: milestoneId});
                     totalGitlab += results.length;
+                    results.map((issue) => {
+                      if (issue.assignee) {
+                        if (!(people[issue.assignee.username])) {
+                          people[issue.assignee.username] = 1;
+                        } else {
+                          people[issue.assignee.username] += 1;
+                        }
+                      }
+                    });
                     resolve();
                   } catch (err) {
                     console.log(err.stack);
@@ -96,6 +106,15 @@ app.get('/milestone', (req, res) => {
                       issues: results,
                       milestoneUrl: milestoneUrl});
                     totalGithub += results.length;
+                    results.map((issue) => {
+                      if (issue.assignee) {
+                        if (!(people[issue.assignee.login])) {
+                          people[issue.assignee.login] = 1;
+                        } else {
+                          people[issue.assignee.login] += 1;
+                        }
+                      }
+                    });
                     resolve();
                   } catch (err) {
                     console.log(err.stack);
@@ -123,11 +142,16 @@ app.get('/milestone', (req, res) => {
 
         // Template this
         console.log('compiling template');
+        const people2 = [];
+        for (const k in people) {
+          people2.push({name: k, number: people[k]});
+        }
         const output = mustache.render(template.toString(), {
           gitlab: gitlabIssues,
           totalGitlab: totalGitlab,
           github: githubIssues,
           totalGithub: totalGithub,
+          people: people2,
           milestone: req.query.gitlab});
         res.send(output);
       },
