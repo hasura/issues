@@ -69,7 +69,9 @@
                         {{/labels}}
                       {{/labels.length}}
                       &nbsp;&nbsp;
-                      {{author.name}}
+                      {{#assignee}}
+                        <span class="label label-default">{{assignee.name}}</span>
+                      {{/assignee}}
                     </div>
                   </div>
                 </div>
@@ -110,7 +112,9 @@
                         {{/labels}}
                       {{/labels.length}}
                       &nbsp;&nbsp;
-                      {{user.login}}
+                      {{#assignee}}
+                        <span class="label label-default">{{assignee.login}}</span>
+                      {{/assignee}}
                     </div>
                   </div>
                 </div>
