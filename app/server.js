@@ -42,8 +42,8 @@ app.get('/milestone', (req, res) => {
     let totalGitlab = 0;
     const gitlabPromises = projects.gitlab.map((p, i) => {
       const promise = new Promise((resolve, reject) => {
-        // fetch(`https://gitlab.com/api/v3/projects/${p.replace('/','%2F')}/issues?milestone=${req.query.gitlab}&state=opened`,
-        fetch('http://192.168.99.100:7031/gitlab',
+        fetch(`https://gitlab.com/api/v3/projects/${p.replace('/','%2F')}/issues?milestone=${req.query.gitlab}&state=opened`,
+        // fetch('http://192.168.99.100:7031/gitlab',
           { headers: {
             'Content-Type': 'application/json',
             'PRIVATE-TOKEN': `${GITLAB}`
@@ -79,8 +79,8 @@ app.get('/milestone', (req, res) => {
     let totalGithub = 0;
     const githubPromises = projects.github.map((p, i) => {
       const promise = new Promise((resolve, reject) => {
-        // fetch(`https://api.github.com/repos/${p}/issues?milestone=${req.query.github}&state=open`,
-        fetch('http://192.168.99.100:7031/github',
+        fetch(`https://api.github.com/repos/${p}/issues?milestone=${req.query.github}&state=open`,
+        // fetch('http://192.168.99.100:7031/github',
           { headers: {
             'Content-Type': 'application/json',
             'Authorization': `token ${GITHUB}`
