@@ -103,7 +103,7 @@ app.get('/milestone/:milestone', (req, res) => {
                   try {
                     const results = JSON.parse(data);
                     const milestoneUrl = (results[0] && results[0].milestone) ? results[0].milestone.html_url : null;
-                    githubIssues.push({project: p, projectNo: i,
+                    githubIssues.push({project: projectName, projectNo: i,
                       noIssues: results.length,
                       issues: results,
                       milestoneUrl: milestoneUrl});
