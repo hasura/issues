@@ -34,16 +34,16 @@ const issueCompare = (a, b) => {
   return 0;
 };
 
-app.get('/milestone', (req, res) => {
+app.get('/milestone/:milestone', (req, res) => {
   if ((projects.gitlab && projects.gitlab.length > 0) || (projects.github && projects.github.length > 0)) {
     console.log("Fetching from gitlab: " + JSON.stringify(projects.gitlab));
-
+    const milestone = req.params.milestone;
     const people = {};
     const gitlabIssues = [];
     let totalGitlab = 0;
     const gitlabPromises = projects.gitlab.map((p, i) => {
       const promise = new Promise((resolve, reject) => {
-        fetch(`https://gitlab.com/api/v3/projects/${p.replace('/','%2F')}/issues?milestone=${req.query.gitlab}&state=opened`,
+        fetch(`https://gitlab.com/api/v3/projects/${p.replace('/','%2F')}/issues?milestone=${milestone}&state=opened`,
         // fetch('http://192.168.99.100:7031/gitlab',
           { headers: {
             'Content-Type': 'application/json',
@@ -88,8 +88,10 @@ app.get('/milestone', (req, res) => {
     const githubIssues = [];
     let totalGithub = 0;
     const githubPromises = projects.github.map((p, i) => {
+      const projectName = p.name;
+      const milestoneId = p.milestones[milestone];
       const promise = new Promise((resolve, reject) => {
-        fetch(`https://api.github.com/repos/${p}/issues?milestone=${req.query.github}&state=open`,
+        fetch(`https://api.github.com/repos/${projectName}/issues?milestone=${milestoneId}&state=open`,
         // fetch('http://192.168.99.100:7031/github',
           { headers: {
             'Content-Type': 'application/json',
@@ -152,7 +154,7 @@ app.get('/milestone', (req, res) => {
           github: githubIssues,
           totalGithub: totalGithub,
           people: people2,
-          milestone: req.query.gitlab});
+          milestone: milestone});
         res.send(output);
       },
       (error) => {
