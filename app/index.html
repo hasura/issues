@@ -16,6 +16,18 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <style>
+      .relative-td {
+        position: relative;
+      }
+      .fill-td {
+        position: absolute;
+        top: 0px;
+        background: rgba(152, 200, 246, 0.8) none repeat scroll 0% 0%;
+        bottom: 0px;
+        width: 90%;
+        left: 0px;
+        z-index: -1;
+      }
       .panel-title {
         font-size: 14px;
       }
@@ -68,12 +80,18 @@
               <tbody>
                 {{#people}}
                   <tr>
-                    <td>{{name}}</td>
+                    <td class="relative-td">
+                      <div class="fill-td" style="width: {{width}}%;"></div>
+                      {{name}}
+                    </td>
                     <td>{{number}}</td>
                   </tr>
                 {{/people}}
                   <tr>
-                    <td><b><i>unassigned</i></b></td>
+                    <td class="relative-td">
+                      <div class="fill-td" style="width: {{unassignedWidth}}%;"></div>
+                      <b><i>unassigned</i></b>
+                    </td>
                     <td><b>{{unassignedTasks}}</b></td>
                   </tr>
               </tbody>

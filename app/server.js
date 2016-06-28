@@ -142,27 +142,28 @@ app.get('/milestone/:milestone', (req, res) => {
 
     Promise.all(gitlabPromises.concat(githubPromises)).then(
       () => {
-        // Sort according to number of issues
-        gitlabIssues.sort(issueCompare);
-        githubIssues.sort(issueCompare);
-
-        // Template this
-        console.log('compiling template');
-        const people2 = [];
-        let assignedTasks = 0;
-        for (const k in people) {
-          people2.push({name: k, number: people[k]});
-          assignedTasks += people[k];
-        }
-
-
         // Assemble stats
         try {
-          const deadline = new Date(DEADLINES[milestone]);
+
+          // Sort according to number of issues
+          gitlabIssues.sort(issueCompare);
+          githubIssues.sort(issueCompare);
+
+          // Compile per person list
+          console.log('compiling template');
+          const people2 = [];
+          let assignedTasks = 0;
           const totalTasks = totalGitlab + totalGithub;
+          for (const k in people) {
+            people2.push({name: k, number: people[k], width: (people[k]/totalTasks*100)});
+            assignedTasks += people[k];
+          }
+          const unassignedTasks = totalTasks - assignedTasks;
+          const unassignedWidth = unassignedTasks/totalTasks * 100;
+
+          const deadline = new Date(DEADLINES[milestone]);
           const daysLeft = Math.floor((deadline.getTime() - (new Date()).getTime())/ (24 * 60 * 60 * 1000));
           const runRate = Math.ceil(totalTasks/daysLeft);
-          const unassignedTasks = totalTasks - assignedTasks;
 
           const output = mustache.render(template.toString(), {
             deadline: deadline.toDateString().toString().substr(0,11),
@@ -170,6 +171,7 @@ app.get('/milestone/:milestone', (req, res) => {
             daysLeft: daysLeft,
             runRate: runRate,
             unassignedTasks: unassignedTasks,
+            unassignedWidth: unassignedWidth,
             gitlab: gitlabIssues,
             totalGitlab: totalGitlab,
             github: githubIssues,
