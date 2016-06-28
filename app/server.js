@@ -9,6 +9,8 @@ const mustache = require('mustache');
 const app = express();
 const GITHUB = process.env.GITHUB;
 const GITLAB = process.env.GITLAB;
+const DEADLINES = JSON.parse(process.env.DEADLINES);
+const USERS = JSON.parse(process.env.USERS);
 
 // Perform some basic validation on configuration
 if (!(process.env.PROJECTS)) {
@@ -59,10 +61,11 @@ app.get('/milestone/:milestone', (req, res) => {
                     totalGitlab += results.length;
                     results.map((issue) => {
                       if (issue.assignee) {
-                        if (!(people[issue.assignee.username])) {
-                          people[issue.assignee.username] = 1;
+                        const person = USERS[issue.assignee.username];
+                        if (!(people[person])) {
+                          people[person] = 1;
                         } else {
-                          people[issue.assignee.username] += 1;
+                          people[person] += 1;
                         }
                       }
                     });
@@ -110,10 +113,11 @@ app.get('/milestone/:milestone', (req, res) => {
                     totalGithub += results.length;
                     results.map((issue) => {
                       if (issue.assignee) {
-                        if (!(people[issue.assignee.login])) {
-                          people[issue.assignee.login] = 1;
+                        const person = USERS[issue.assignee.login];
+                        if (!(people[person])) {
+                          people[person] = 1;
                         } else {
-                          people[issue.assignee.login] += 1;
+                          people[person] += 1;
                         }
                       }
                     });
@@ -145,17 +149,40 @@ app.get('/milestone/:milestone', (req, res) => {
         // Template this
         console.log('compiling template');
         const people2 = [];
+        let assignedTasks = 0;
         for (const k in people) {
           people2.push({name: k, number: people[k]});
+          assignedTasks += people[k];
         }
-        const output = mustache.render(template.toString(), {
-          gitlab: gitlabIssues,
-          totalGitlab: totalGitlab,
-          github: githubIssues,
-          totalGithub: totalGithub,
-          people: people2,
-          milestone: milestone});
-        res.send(output);
+
+
+        // Assemble stats
+        try {
+          const deadline = new Date(DEADLINES[milestone]);
+          const totalTasks = totalGitlab + totalGithub;
+          const daysLeft = Math.floor((deadline.getTime() - (new Date()).getTime())/ (24 * 60 * 60 * 1000));
+          const runRate = Math.ceil(totalTasks/daysLeft);
+          const unassignedTasks = totalTasks - assignedTasks;
+
+          const output = mustache.render(template.toString(), {
+            deadline: deadline.toDateString().toString().substr(0,11),
+            totalTasks: totalTasks,
+            daysLeft: daysLeft,
+            runRate: runRate,
+            unassignedTasks: unassignedTasks,
+            gitlab: gitlabIssues,
+            totalGitlab: totalGitlab,
+            github: githubIssues,
+            totalGithub: totalGithub,
+            people: people2,
+            milestone: milestone});
+          res.send(output);
+        }
+        catch (err) {
+          console.log(err.stack);
+          res.send(err);
+        }
+
       },
       (error) => {
         res.send(error);

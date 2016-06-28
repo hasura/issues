@@ -39,6 +39,27 @@
   </head>
   <body>
     <div class="container">
+      <h2><u>Deadline:</u> <span class="grey">{{deadline}}</span></h2>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-4">
+            <p>
+              <b>Time left:</b> {{daysLeft}} days
+            </p>
+          </div>
+          <div class="col-md-4">
+            <p>
+              <b>Total:</b> {{totalTasks}} tasks
+            </p>
+          </div>
+          <div class="col-md-4">
+            <p>
+              <b>Required:</b> {{runRate}} tasks/day
+            </p>
+          </div>
+        </div>
+      </div>
+      <hr/>
       <h2><u>People</u></h2>
       <div class="container">
         <div class="row">
@@ -51,6 +72,10 @@
                     <td>{{number}}</td>
                   </tr>
                 {{/people}}
+                  <tr>
+                    <td><b><i>unassigned</i></b></td>
+                    <td><b>{{unassignedTasks}}</b></td>
+                  </tr>
               </tbody>
             </table>
           </div>
