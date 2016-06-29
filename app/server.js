@@ -38,6 +38,11 @@ const issueCompare = (a, b) => {
 
 app.get('/milestone/:milestone', (req, res) => {
   if ((projects.gitlab && projects.gitlab.length > 0) || (projects.github && projects.github.length > 0)) {
+    let onlyUser = null;
+    if (req.query.user) {
+      onlyUser = req.query.user;
+    }
+
     console.log("Fetching from gitlab: " + JSON.stringify(projects.gitlab));
     const milestone = req.params.milestone;
     const people = {};
@@ -57,18 +62,30 @@ app.get('/milestone/:milestone', (req, res) => {
                   try {
                     const results = JSON.parse(data);
                     const milestoneId = (results[0] && results[0].milestone) ? results[0].milestone.iid : null;
-                    gitlabIssues.push({project: p, projectNo: i, noIssues: results.length, issues: results, milestoneId: milestoneId});
-                    totalGitlab += results.length;
+                    const issues = [];
+
                     results.map((issue) => {
+                      let person = null;
                       if (issue.assignee) {
-                        const person = USERS[issue.assignee.username];
+                        person = USERS[issue.assignee.username];
                         if (!(people[person])) {
                           people[person] = 1;
                         } else {
                           people[person] += 1;
                         }
                       }
+                      if (onlyUser) {
+                        if (person && onlyUser === person) {
+                          issues.push(issue);
+                        }
+                      } else {
+                        issues.push(issue);
+                      }
                     });
+
+                    gitlabIssues.push({project: p, projectNo: i, noIssues: issues.length, issues: issues, milestoneId: milestoneId});
+                    totalGitlab += issues.length;
+
                     resolve();
                   } catch (err) {
                     console.log(err.stack);
@@ -106,21 +123,33 @@ app.get('/milestone/:milestone', (req, res) => {
                   try {
                     const results = JSON.parse(data);
                     const milestoneUrl = (results[0] && results[0].milestone) ? results[0].milestone.html_url : null;
-                    githubIssues.push({project: projectName, projectNo: i,
-                      noIssues: results.length,
-                      issues: results,
-                      milestoneUrl: milestoneUrl});
-                    totalGithub += results.length;
+                    const issues = [];
                     results.map((issue) => {
+                      let person = null;
                       if (issue.assignee) {
-                        const person = USERS[issue.assignee.login];
+                        person = USERS[issue.assignee.login];
                         if (!(people[person])) {
                           people[person] = 1;
                         } else {
                           people[person] += 1;
                         }
                       }
+                      if (onlyUser) {
+                        if (person && onlyUser === person) {
+                          issues.push(issue);
+                        }
+                      } else {
+                        issues.push(issue);
+                      }
                     });
+
+                    githubIssues.push({
+                      project: projectName,
+                      projectNo: i,
+                      noIssues: issues.length,
+                      issues: issues,
+                      milestoneUrl: milestoneUrl});
+                    totalGithub += issues.length;
                     resolve();
                   } catch (err) {
                     console.log(err.stack);
@@ -155,8 +184,15 @@ app.get('/milestone/:milestone', (req, res) => {
           let assignedTasks = 0;
           const totalTasks = totalGitlab + totalGithub;
           for (const k in people) {
-            people2.push({name: k, number: people[k], width: (people[k]/totalTasks*100)});
-            assignedTasks += people[k];
+            if (onlyUser) {
+              if (onlyUser === k) {
+                people2.push({name: k, number: people[k], width: (people[k]/totalTasks*100)});
+                assignedTasks += people[k];
+              }
+            } else {
+              people2.push({name: k, number: people[k], width: (people[k]/totalTasks*100)});
+              assignedTasks += people[k];
+            }
           }
           const unassignedTasks = totalTasks - assignedTasks;
           const unassignedWidth = unassignedTasks/totalTasks * 100;
@@ -164,6 +200,13 @@ app.get('/milestone/:milestone', (req, res) => {
           const deadline = new Date(DEADLINES[milestone]);
           const daysLeft = Math.floor((deadline.getTime() - (new Date()).getTime())/ (24 * 60 * 60 * 1000));
           const runRate = Math.ceil(totalTasks/daysLeft);
+
+          let expanded = '';
+          let title = milestone;
+          if (onlyUser) {
+            expanded = ' in';
+            title = onlyUser + ' | ' + title;
+          }
 
           const output = mustache.render(template.toString(), {
             deadline: deadline.toDateString().toString().substr(0,11),
@@ -177,6 +220,8 @@ app.get('/milestone/:milestone', (req, res) => {
             github: githubIssues,
             totalGithub: totalGithub,
             people: people2,
+            expanded: expanded,
+            title: title,
             milestone: milestone});
           res.send(output);
         }
