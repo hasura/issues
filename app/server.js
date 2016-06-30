@@ -5,6 +5,7 @@ const express = require('express');
 const fs = require('fs');
 const template = fs.readFileSync('/app/index.html');
 const mustache = require('mustache');
+const moment = require('moment');
 
 const app = express();
 const GITHUB = process.env.GITHUB;
@@ -36,21 +37,84 @@ const issueCompare = (a, b) => {
   return 0;
 };
 
+const addIssue = (allIssues, issue) => {
+  const opened = moment(issue.created_at).format('YYYYMMDD');
+
+  let cdate = null;
+  let closed = null;
+  if (issue.closed_at) {
+    cdate = issue.closed_at;
+  } else if (issue.updated_at && issue.state === 'closed') {
+    cdate = issue.updated_at;
+  }
+  if (cdate) {
+    closed = moment(cdate).format('YYYYMMDD');
+  }
+  
+  const today = moment().format('YYYYMMDD');
+  const allIssues_ = allIssues.map((ai) => {
+    if (opened <= ai.date) {
+      ai.open += 1;
+    }
+    if (ai.date <= today) {
+      if (closed && (closed <= ai.date)) {
+        ai.closed += 1;
+      }
+    }
+    return ai;
+  });
+
+  return allIssues_;
+};
+
+const initializeAllIssues = (milestone) => {
+  const startDate = moment(DEADLINES[milestone].start);
+  const endDate = moment(DEADLINES[milestone].end);
+  const today = moment().format('YYYYMMDD');
+  const allIssues = [];
+  let current = startDate;
+  do {
+    if (current.format('YYYYMMDD') <= today) {
+      allIssues.push({date: current.format('YYYYMMDD'), open: 0, closed: 0});
+    } else {
+      allIssues.push({date: current.format('YYYYMMDD'), open: 0});
+    }
+    current = current.add(1, 'days');
+  } while (current.unix() !== endDate.unix());
+  return allIssues;
+};
+
 app.get('/milestone/:milestone', (req, res) => {
   if ((projects.gitlab && projects.gitlab.length > 0) || (projects.github && projects.github.length > 0)) {
+    const milestone = req.params.milestone;
+
     let onlyUser = null;
     if (req.query.user) {
       onlyUser = req.query.user;
     }
 
+    let allIssues = initializeAllIssues(milestone);
+    /*
+     * allIssues = {
+     *   "2016-06-08": {
+     *     open: 10,
+     *     closed: 2
+     *   },
+     *   "2016-06-09": {
+     *     open: 11,
+     *     closed: 5
+     *   }
+     * }
+     */
+
+    /* ********* GITLAB **************** */
     console.log("Fetching from gitlab: " + JSON.stringify(projects.gitlab));
-    const milestone = req.params.milestone;
     const people = {};
     const gitlabIssues = [];
     let totalGitlab = 0;
     const gitlabPromises = projects.gitlab.map((p, i) => {
       const promise = new Promise((resolve, reject) => {
-        fetch(`https://gitlab.com/api/v3/projects/${p.replace('/','%2F')}/issues?milestone=${milestone}&state=opened`,
+        fetch(`https://gitlab.com/api/v3/projects/${p.replace('/','%2F')}/issues?milestone=${milestone}`,
         // fetch('http://192.168.99.100:7031/gitlab',
           { headers: {
             'Content-Type': 'application/json',
@@ -68,18 +132,26 @@ app.get('/milestone/:milestone', (req, res) => {
                       let person = null;
                       if (issue.assignee) {
                         person = USERS[issue.assignee.username];
-                        if (!(people[person])) {
-                          people[person] = 1;
-                        } else {
-                          people[person] += 1;
+                        if (issue.state === 'opened') {
+                          if (!(people[person])) {
+                            people[person] = 1;
+                          } else {
+                            people[person] += 1;
+                          }
                         }
                       }
                       if (onlyUser) {
                         if (person && onlyUser === person) {
-                          issues.push(issue);
+                          if (issue.state === 'opened') {
+                            issues.push(issue);
+                          }
+                          allIssues = addIssue(allIssues, issue);
                         }
                       } else {
-                        issues.push(issue);
+                        if (issue.state === 'opened') {
+                          issues.push(issue);
+                        }
+                        allIssues = addIssue(allIssues, issue);
                       }
                     });
 
@@ -104,6 +176,7 @@ app.get('/milestone/:milestone', (req, res) => {
       return promise;
     });
 
+    /* ********* GITHUB **************** */
     console.log("Fetching from github: " + JSON.stringify(projects.github));
     const githubIssues = [];
     let totalGithub = 0;
@@ -128,18 +201,27 @@ app.get('/milestone/:milestone', (req, res) => {
                       let person = null;
                       if (issue.assignee) {
                         person = USERS[issue.assignee.login];
-                        if (!(people[person])) {
-                          people[person] = 1;
-                        } else {
-                          people[person] += 1;
+                        if (issue.state === 'open') {
+                          if (!(people[person])) {
+                            people[person] = 1;
+                          } else {
+                            people[person] += 1;
+                          }
                         }
                       }
+
                       if (onlyUser) {
                         if (person && onlyUser === person) {
-                          issues.push(issue);
+                          if (issue.state === 'open') {
+                            issues.push(issue);
+                          }
+                          allIssues = addIssue(allIssues, issue);
                         }
                       } else {
-                        issues.push(issue);
+                        if (issue.state === 'open') {
+                          issues.push(issue);
+                        }
+                        allIssues = addIssue(allIssues, issue);
                       }
                     });
 
@@ -197,7 +279,7 @@ app.get('/milestone/:milestone', (req, res) => {
           const unassignedTasks = totalTasks - assignedTasks;
           const unassignedWidth = unassignedTasks/totalTasks * 100;
 
-          const deadline = new Date(DEADLINES[milestone]);
+          const deadline = new Date(DEADLINES[milestone].end);
           const daysLeft = Math.floor((deadline.getTime() - (new Date()).getTime())/ (24 * 60 * 60 * 1000));
           const runRate = Math.ceil(totalTasks/daysLeft);
 
@@ -222,7 +304,9 @@ app.get('/milestone/:milestone', (req, res) => {
             people: people2,
             expanded: expanded,
             title: title,
-            milestone: milestone});
+            milestone: milestone,
+            allIssues: JSON.stringify(allIssues)
+          });
           res.send(output);
         }
         catch (err) {

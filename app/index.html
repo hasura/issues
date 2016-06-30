@@ -16,6 +16,10 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <style>
+      #myChart {
+        width: 100%;
+        height: 300px;
+      }
       .relative-td {
         position: relative;
         font-weight: bold;
@@ -49,6 +53,9 @@
         color: #666;
       }
     </style>
+    <script type="text/javascript">
+      var allIssues = {{& allIssues}};
+    </script>
   </head>
   <body>
     <div class="container">
@@ -73,6 +80,9 @@
         </div>
       </div>
       <hr/>
+      <div class="container">
+        <canvas id="myChart"></canvas>
+      </div>
       <h2><u>People</u></h2>
       <div class="container">
         <div class="row">
@@ -191,5 +201,42 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.6/Chart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        var ctx = $('#myChart');
+        var chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: allIssues.map(function (ai) { return ai.date; }),
+            datasets: [
+              {
+                label: 'Open',
+                data: allIssues.map(function(ai) { return ai.open; }),
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255,99,132,1)',
+                borderWidth: 1
+              },
+              {
+                label: 'Closed',
+                data: allIssues.map(function(ai) { return ai.closed; }),
+                backgroundColor: 'rgba(75, 192, 192, 0.9)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: false
+                }
+              }]
+            }
+          }
+        });
+      });
+    </script>
   </body>
 </html>
