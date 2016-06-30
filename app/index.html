@@ -211,16 +211,16 @@
             labels: allIssues.map(function (ai) { return ai.date; }),
             datasets: [
               {
-                label: 'Open',
+                label: 'Total',
                 data: allIssues.map(function(ai) { return ai.open; }),
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                backgroundColor: 'rgba(255, 99, 132, 0.1)',
                 borderColor: 'rgba(255,99,132,1)',
                 borderWidth: 1
               },
               {
                 label: 'Closed',
                 data: allIssues.map(function(ai) { return ai.closed; }),
-                backgroundColor: 'rgba(75, 192, 192, 0.9)',
+                backgroundColor: 'rgba(75, 192, 192, 0.3)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
               }
