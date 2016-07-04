@@ -280,7 +280,7 @@ app.get('/milestone/:milestone', (req, res) => {
           const unassignedWidth = unassignedTasks/totalTasks * 100;
 
           const deadline = new Date(DEADLINES[milestone].end);
-          const daysLeft = Math.floor((deadline.getTime() - (new Date()).getTime())/ (24 * 60 * 60 * 1000));
+          const daysLeft = Math.floor((deadline.getTime() + 24*60*60*1000 - (new Date()).getTime())/ (24 * 60 * 60 * 1000));
           const runRate = Math.ceil(totalTasks/daysLeft);
 
           let expanded = '';
