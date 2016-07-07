@@ -1,5 +1,12 @@
 'use strict';
 
+/*
+ * Issue dependency
+ * Possible formats: #34 (same repo)
+ *                   ##hasura/raven:37 (will try to search for project across vendors)
+ *                   ##github:hasura/raven:37 (same vendor)
+ */
+
 const fetch = require('node-fetch');
 const express = require('express');
 const fs = require('fs');
@@ -69,9 +76,12 @@ const addIssue = (allIssues, issue) => {
 
 const initializeAllIssues = (milestone) => {
   const startDate = moment(DEADLINES[milestone].start);
-  const endDate = moment(DEADLINES[milestone].end);
+  const endDate = moment(DEADLINES[milestone].end).add(1, 'days');
   const today = moment().format('YYYYMMDD');
   const allIssues = [];
+  if (startDate.unix() > endDate.unix()) {
+    throw ('Start date cannot be greater than end date');
+  }
   let current = startDate;
   do {
     if (current.format('YYYYMMDD') <= today) {
