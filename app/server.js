@@ -2,10 +2,40 @@
 
 /*
  * Issue dependency
- * Possible formats: #34 (same repo)
- *                   ##hasura/raven:37 (will try to search for project across vendors)
- *                   ##github:hasura/raven:37 (same vendor)
+ * Possible formats: needs #34 (same repo)
+ *                   needs ##hasura/raven:37 (will try to search for project across vendors)
+ *                   needs ##github:hasura/raven:37 (same vendor)
+ * regex:
+ * needs\s[#\d+])
+ * dependent issues: {
+ *   vendor:group/project#n: {
+ *      state: '',
+ *      closedDate: '',
+ *      owner: '',
+ *      url: '',
+ *      blocking: [
+ *        {title, url},
+ *        {title, url},
+ *      ]
+ *   }
+ * }
  */
+
+/*
+ * Issue graph
+ * -----------
+ * allIssues = {
+ *   "2016-06-08": {
+ *     open: 10,
+ *     closed: 2
+ *   },
+ *   "2016-06-09": {
+ *     open: 11,
+ *     closed: 5
+ *   }
+ * }
+ */
+
 
 const fetch = require('node-fetch');
 const express = require('express');
@@ -14,6 +44,7 @@ const template = fs.readFileSync('/app/index.html');
 const mustache = require('mustache');
 const moment = require('moment');
 
+const needsRegex = /needs\s(#\d+|github:\w+\/\w+#\d+|gitlab:\w+\/\w+#\d+)/gi;
 const app = express();
 const GITHUB = process.env.GITHUB;
 const GITLAB = process.env.GITLAB;
@@ -94,6 +125,40 @@ const initializeAllIssues = (milestone) => {
   return allIssues;
 };
 
+const addBlockers = (issueName, issueUrl, issueOpen, issue, allDepIssues) => {
+  needsRegex.lastIndex = 0;
+  let match = needsRegex.exec(issue.description);
+  while (match !== null) {
+    let blocker = match[1];
+    if (blocker !== '') {
+
+      // #13 => same project issue
+      if (blocker.match(/^#\d+/)) {
+        blocker = issueName.split('#')[0] + blocker;
+      } // else blocker is gitlab:group/project#no
+
+      if (allDepIssues[blocker]) {
+        if (issueOpen) {
+          allDepIssues[blocker].blockingOpen.push({
+            title: issue.title,
+            url: issueUrl,
+            name: issueName
+          })
+        } else {
+          allDepIssues[blocker].blockingClosed.push({
+            title: issue.title,
+            url: issueUrl,
+            name: issueName
+          })
+        }
+      }
+      // Blocker issue not tracked :(
+    }
+    match = needsRegex.exec(issue.description);
+  }
+  return allDepIssues;
+};
+
 app.get('/milestone/:milestone', (req, res) => {
   if ((projects.gitlab && projects.gitlab.length > 0) || (projects.github && projects.github.length > 0)) {
     const milestone = req.params.milestone;
@@ -104,18 +169,7 @@ app.get('/milestone/:milestone', (req, res) => {
     }
 
     let allIssues = initializeAllIssues(milestone);
-    /*
-     * allIssues = {
-     *   "2016-06-08": {
-     *     open: 10,
-     *     closed: 2
-     *   },
-     *   "2016-06-09": {
-     *     open: 11,
-     *     closed: 5
-     *   }
-     * }
-     */
+    let allDepIssues = {};
 
     /* ********* GITLAB **************** */
     console.log("Fetching from gitlab: " + JSON.stringify(projects.gitlab));
@@ -142,7 +196,7 @@ app.get('/milestone/:milestone', (req, res) => {
                       let person = null;
                       if (issue.assignee) {
                         person = USERS[issue.assignee.username];
-                        if (issue.state === 'opened') {
+                        if (issue.state !== 'closed') {
                           if (!(people[person])) {
                             people[person] = 1;
                           } else {
@@ -152,17 +206,29 @@ app.get('/milestone/:milestone', (req, res) => {
                       }
                       if (onlyUser) {
                         if (person && onlyUser === person) {
-                          if (issue.state === 'opened') {
+                          if (issue.state !== 'closed') {
                             issues.push(issue);
                           }
                           allIssues = addIssue(allIssues, issue);
                         }
                       } else {
-                        if (issue.state === 'opened') {
+                        if (issue.state !== 'closed') {
                           issues.push(issue);
                         }
                         allIssues = addIssue(allIssues, issue);
                       }
+                      // Add to allDepIssues
+                      const issueName = 'gitlab:' + p + '#' + issue.iid;
+                      const issueUrl = 'https://gitlab.com/'+p+'/issues/'+issue.iid;
+                      const issueOpen = issue.state !== 'closed';
+                      if (!(allDepIssues[issueName])) {
+                        allDepIssues[issueName] = {
+                          title: issue.title, url: issueUrl,
+                          blockingOpen: [], blockingClosed: [], closed: (issueOpen ? false : true),
+                          closed_at: (issueOpen ? null : issue.updated_at)
+                        };
+                      }
+                      allDepIssues = addBlockers(issueName, issueUrl, issueOpen, issue, allDepIssues);
                     });
 
                     gitlabIssues.push({project: p, projectNo: i, noIssues: issues.length, issues: issues, milestoneId: milestoneId});
@@ -233,6 +299,18 @@ app.get('/milestone/:milestone', (req, res) => {
                         }
                         allIssues = addIssue(allIssues, issue);
                       }
+                      // Add to allDepIssues
+                      const issueName = 'github:' + p + '#' + issue.number;
+                      const issueUrl = issue.html_url
+                      const issueOpen = issue.state === 'open';
+                      if (!(allDepIssues[issueName])) {
+                        allDepIssues[issueName] = {
+                          title: issue.title, url: issueUrl,
+                          blockingOpen: [], blockingClosed: [], closed: (issueOpen ? false : true),
+                          closed_at: (issueOpen ? null : issue.closed_at)
+                        };
+                      }
+                      allDepIssues = addBlockers(issueName, issueUrl, issueOpen, issue, allDepIssues);
                     });
 
                     githubIssues.push({
@@ -300,6 +378,10 @@ app.get('/milestone/:milestone', (req, res) => {
             title = onlyUser + ' | ' + title;
           }
 
+          const _allDepIssues = Object.keys(allDepIssues).map((k, i) => {
+            return {name: k, data: allDepIssues[k], index: i};
+          }).filter(b => ((b.data.blockingOpen.length > 0) || (b.data.blockingClosed.length > 0)));
+
           const output = mustache.render(template.toString(), {
             deadline: deadline.toDateString().toString().substr(0,11),
             totalTasks: totalTasks,
@@ -315,6 +397,8 @@ app.get('/milestone/:milestone', (req, res) => {
             expanded: expanded,
             title: title,
             milestone: milestone,
+            blockers: _allDepIssues,
+            totalBlockers: _allDepIssues.length,
             allIssues: JSON.stringify(allIssues)
           });
           res.send(output);

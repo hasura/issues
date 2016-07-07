@@ -52,6 +52,10 @@
       .grey {
         color: #666;
       }
+      /*
+      ul {
+        list-style: none;
+      } */
     </style>
     <script type="text/javascript">
       var allIssues = {{& allIssues}};
@@ -111,90 +115,126 @@
         </div>
       </div>
       <hr/>
-      <h2><u>Gitlab ({{totalGitlab}})</u></h2>
-      <div class="container" id="allGitlab">
-        {{#gitlab}}
-          <h4>
-            <a role="button" data-toggle="collapse" data-parent="#allGitlab" href="#gitlab-{{projectNo}}" aria-expanded="true" aria-controls="gitlab-{{projectNo}}">
-              {{project}}  ({{noIssues}})
-            </a>&nbsp;&nbsp;
-            &nbsp;&nbsp;&nbsp;<a target="_blank" href="https://gitlab.com/{{project}}/milestones/{{milestoneId}}" class="repo-link">View on Gitlab</a>
-          </h4>
-          <div class="container collapse{{expanded}}" id="gitlab-{{projectNo}}">
-            {{#issues}}
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="panel panel-default">
-                    <div class="panel-heading">
-                      <h3 class="panel-title">
-                        <span class="grey">#{{iid}}</span>&nbsp; {{title}}
-                        <a target="_blank" href="https://gitlab.com/{{project}}/issues/{{iid}}">View on Gitlab</a></h3>
-                      </h3>
+      <div class="row">
+        <div class="col-md-6">
+          <h2><u>Gitlab ({{totalGitlab}})</u></h2>
+          <div class="container-fluid" id="allGitlab">
+            {{#gitlab}}
+              <h4>
+                <a role="button" data-toggle="collapse" data-parent="#allGitlab" href="#gitlab-{{projectNo}}" aria-expanded="true" aria-controls="gitlab-{{projectNo}}">
+                  {{project}}  ({{noIssues}})
+                </a>&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;<a target="_blank" href="https://gitlab.com/{{project}}/milestones/{{milestoneId}}" class="repo-link">View on Gitlab</a>
+              </h4>
+              <div class="container-fluid collapse{{expanded}}" id="gitlab-{{projectNo}}">
+                {{#issues}}
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="panel panel-default">
+                        <div class="panel-heading">
+                          <h3 class="panel-title">
+                            <span class="grey">#{{iid}}</span>&nbsp; {{title}}
+                            <a target="_blank" href="https://gitlab.com/{{project}}/issues/{{iid}}">View on Gitlab</a></h3>
+                          </h3>
+                        </div>
+                        <div class="panel-body">
+                          <p>{{description}}</p>
+                        </div>
+                        <div class="panel-footer">
+                          {{#labels.length}}
+                            {{#labels}}
+                            <span class="label label-primary">{{.}}</span>
+                            {{/labels}}
+                          {{/labels.length}}
+                          &nbsp;&nbsp;
+                          {{#assignee}}
+                            <span class="label label-default">{{assignee.name}}</span>
+                          {{/assignee}}
+                        </div>
+                      </div>
                     </div>
-                    <div class="panel-body">
-                      <p>{{description}}</p>
+                  </div>
+                {{/issues}}
+              </div>
+              <hr/>
+            {{/gitlab}}
+          </div>
+          <hr/>
+          <h2><u>Github ({{totalGithub}})</u></h2>
+          <div class="container-fluid" id="allGithub">
+            {{#github}}
+              <h4>
+                <a role="button" data-toggle="collapse" data-parent="#allGithub" href="#github-{{projectNo}}" aria-expanded="true" aria-controls="gitlab-{{projectNo}}">
+                  {{project}}  ({{noIssues}})
+                </a>&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;<a target="_blank" href="{{milestoneUrl}}" class="repo-link">View on Github</a>
+              </h4>
+              <div class="container-fluid collapse{{expanded}}" id="github-{{projectNo}}">
+                {{#issues}}
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="panel panel-default">
+                        <div class="panel-heading">
+                          <h3 class="panel-title">
+                            <span class="grey">#{{number}}</span>
+                            &nbsp; {{title}} &nbsp;
+                            <a target="_blank" href="{{html_url}}">View on Github</a>
+                        </div>
+                        <div class="panel-body">
+                          <p>{{body}}</p>
+                        </div>
+                        <div class="panel-footer">
+                          {{#labels.length}}
+                            {{#labels}}
+                            <span class="label label-primary">{{name}}</span>
+                            {{/labels}}
+                          {{/labels.length}}
+                          &nbsp;&nbsp;
+                          {{#assignee}}
+                            <span class="label label-default">{{assignee.login}}</span>
+                          {{/assignee}}
+                        </div>
+                      </div>
                     </div>
-                    <div class="panel-footer">
-                      {{#labels.length}}
-                        {{#labels}}
-                        <span class="label label-primary">{{.}}</span>
-                        {{/labels}}
-                      {{/labels.length}}
-                      &nbsp;&nbsp;
-                      {{#assignee}}
-                        <span class="label label-default">{{assignee.name}}</span>
-                      {{/assignee}}
-                    </div>
+                  </div>
+                {{/issues}}
+              </div>
+              <hr/>
+            {{/github}}
+          </div>
+        </div>
+        <div class="col-md-6 blocking-container">
+          <h2><u>Blockers ({{totalBlockers}})</u></h2>
+          <div class="container-fluid" id="allBlockers">
+            {{#blockers}}
+              <h4> 
+                <a role="button" data-toggle="collapse" data-parent="#allGitlab" href="#blocker-{{index}}" aria-expanded="true" aria-controls="blocker-{{index}}">
+                  {{data.title}} ({{data.blockingOpen.length}})
+                </a>&nbsp;&nbsp;
+                &nbsp;&nbsp;&nbsp;<a target="_blank" href="{{data.url}}" class="repo-link">{{name}}</a>
+              </h4>
+              <div class="container-fluid collapse{{expanded}}" id="blocker-{{index}}">
+                <div class="panel panel-default">
+                  <div class="panel-body">
+                    <h5>Open ({{data.blockingOpen.length}})</h5>
+                    <ul>
+                      {{#data.blockingOpen}}
+                      <li>{{title}}&nbsp;&nbsp;&nbsp; <a target="_blank" href="{{url}}">{{name}}</a></li>
+                      {{/data.blockingOpen}}
+                    </ul>
+                    <hr/>
+                    <h5>Closed ({{data.blockingClosed.length}})</h5>
+                    <ul>
+                      {{#data.blockingClosed}}
+                      <li>{{title}}&nbsp;&nbsp;&nbsp; <a target="_blank" href="{{url}}">{{name}}</a></li>
+                      {{/data.blockingClosed}}
+                    </ul>
                   </div>
                 </div>
               </div>
-            {{/issues}}
+            {{/blockers}}
           </div>
-          <hr/>
-        {{/gitlab}}
-      </div>
-      <hr/>
-      <h2><u>Github ({{totalGithub}})</u></h2>
-      <div class="container" id="allGithub">
-        {{#github}}
-          <h4>
-            <a role="button" data-toggle="collapse" data-parent="#allGithub" href="#github-{{projectNo}}" aria-expanded="true" aria-controls="gitlab-{{projectNo}}">
-              {{project}}  ({{noIssues}})
-            </a>&nbsp;&nbsp;
-            &nbsp;&nbsp;&nbsp;<a target="_blank" href="{{milestoneUrl}}" class="repo-link">View on Github</a>
-          </h4>
-          <div class="container collapse{{expanded}}" id="github-{{projectNo}}">
-            {{#issues}}
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="panel panel-default">
-                    <div class="panel-heading">
-                      <h3 class="panel-title">
-                        <span class="grey">#{{number}}</span>
-                        &nbsp; {{title}} &nbsp;
-                        <a target="_blank" href="{{html_url}}">View on Github</a>
-                    </div>
-                    <div class="panel-body">
-                      <p>{{body}}</p>
-                    </div>
-                    <div class="panel-footer">
-                      {{#labels.length}}
-                        {{#labels}}
-                        <span class="label label-primary">{{name}}</span>
-                        {{/labels}}
-                      {{/labels.length}}
-                      &nbsp;&nbsp;
-                      {{#assignee}}
-                        <span class="label label-default">{{assignee.login}}</span>
-                      {{/assignee}}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            {{/issues}}
-          </div>
-          <hr/>
-        {{/github}}
+        </div>
       </div>
     </div>
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
