@@ -207,12 +207,13 @@
           <h2><u>Blockers ({{totalBlockers}})</u></h2>
           <div class="container-fluid" id="allBlockers">
             {{#blockers}}
-              <h4> 
+              <h4>
                 <a role="button" data-toggle="collapse" data-parent="#allGitlab" href="#blocker-{{index}}" aria-expanded="true" aria-controls="blocker-{{index}}">
                   {{data.title}} ({{data.blockingOpen.length}})
                 </a>&nbsp;&nbsp;
-                &nbsp;&nbsp;&nbsp;<a target="_blank" href="{{data.url}}" class="repo-link">{{name}}</a>
+                &nbsp;&nbsp;&nbsp;
               </h4>
+              <div><a target="_blank" href="{{data.url}}" class="repo-link">{{name}}</a></div>
               <div class="container-fluid collapse{{expanded}}" id="blocker-{{index}}">
                 <div class="panel panel-default">
                   <div class="panel-body">
@@ -232,6 +233,7 @@
                   </div>
                 </div>
               </div>
+              <hr/>
             {{/blockers}}
           </div>
         </div>

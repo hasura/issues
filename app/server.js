@@ -44,7 +44,7 @@ const template = fs.readFileSync('/app/index.html');
 const mustache = require('mustache');
 const moment = require('moment');
 
-const needsRegex = /needs\s(#\d+|github:\w+\/\w+#\d+|gitlab:\w+\/\w+#\d+)/gi;
+const needsRegex = /needs\s+(#\d+|github:\w+\/\w+#\d+|gitlab:\w+\/\w+#\d+)/gi;
 const app = express();
 const GITHUB = process.env.GITHUB;
 const GITLAB = process.env.GITLAB;
@@ -125,9 +125,9 @@ const initializeAllIssues = (milestone) => {
   return allIssues;
 };
 
-const addBlockers = (issueName, issueUrl, issueOpen, issue, allDepIssues) => {
+const addBlockers = (issueName, issueUrl, issueOpen, issueBody, issue, allDepIssues) => {
   needsRegex.lastIndex = 0;
-  let match = needsRegex.exec(issue.description);
+  let match = needsRegex.exec(issueBody);
   while (match !== null) {
     let blocker = match[1];
     if (blocker !== '') {
@@ -137,24 +137,30 @@ const addBlockers = (issueName, issueUrl, issueOpen, issue, allDepIssues) => {
         blocker = issueName.split('#')[0] + blocker;
       } // else blocker is gitlab:group/project#no
 
-      if (allDepIssues[blocker]) {
-        if (issueOpen) {
-          allDepIssues[blocker].blockingOpen.push({
-            title: issue.title,
-            url: issueUrl,
-            name: issueName
-          })
-        } else {
-          allDepIssues[blocker].blockingClosed.push({
-            title: issue.title,
-            url: issueUrl,
-            name: issueName
-          })
-        }
+      if (!(allDepIssues[blocker])) {
+        allDepIssues[blocker] = {
+          blockingOpen: [],
+          blockingClosed: [],
+        };
       }
-      // Blocker issue not tracked :(
+
+      if (issueOpen) {
+        // allDepIssues[blocker].blockingOpen = (allDepIssues[blocker].blockingOpen) ? allDepIssues[blocker].blockingOpen : [];
+        allDepIssues[blocker].blockingOpen.push({
+          title: issue.title,
+          url: issueUrl,
+          name: issueName
+        })
+      } else {
+        // allDepIssues[blocker].blockingClosed = (allDepIssues[blocker].blockingClosed) ? allDepIssues[blocker].blockingClosed : [];
+        allDepIssues[blocker].blockingClosed.push({
+          title: issue.title,
+          url: issueUrl,
+          name: issueName
+        })
+      }
     }
-    match = needsRegex.exec(issue.description);
+    match = needsRegex.exec(issueBody);
   }
   return allDepIssues;
 };
@@ -221,14 +227,21 @@ app.get('/milestone/:milestone', (req, res) => {
                       const issueName = 'gitlab:' + p + '#' + issue.iid;
                       const issueUrl = 'https://gitlab.com/'+p+'/issues/'+issue.iid;
                       const issueOpen = issue.state !== 'closed';
+
+                      // Add to the blocker data structure
                       if (!(allDepIssues[issueName])) {
                         allDepIssues[issueName] = {
-                          title: issue.title, url: issueUrl,
-                          blockingOpen: [], blockingClosed: [], closed: (issueOpen ? false : true),
-                          closed_at: (issueOpen ? null : issue.updated_at)
+                          blockingClosed: [],
+                          blockingOpen: []
                         };
                       }
-                      allDepIssues = addBlockers(issueName, issueUrl, issueOpen, issue, allDepIssues);
+                      allDepIssues[issueName].title = issue.title;
+                      allDepIssues[issueName].url = issueUrl;
+                      allDepIssues[issueName].closed = (issueOpen ? false : true);
+                      allDepIssues[issueName].closed_at = (issueOpen ? null : issue.updated_at);
+
+                      // Add blocking issues for this issue
+                      allDepIssues = addBlockers(issueName, issueUrl, issueOpen, issue.description, issue, allDepIssues);
                     });
 
                     gitlabIssues.push({project: p, projectNo: i, noIssues: issues.length, issues: issues, milestoneId: milestoneId});
@@ -300,17 +313,24 @@ app.get('/milestone/:milestone', (req, res) => {
                         allIssues = addIssue(allIssues, issue);
                       }
                       // Add to allDepIssues
-                      const issueName = 'github:' + p + '#' + issue.number;
+                      const issueName = 'github:' + projectName + '#' + issue.number;
                       const issueUrl = issue.html_url
                       const issueOpen = issue.state === 'open';
+
+                      // Add to the blocker data structure
                       if (!(allDepIssues[issueName])) {
                         allDepIssues[issueName] = {
-                          title: issue.title, url: issueUrl,
-                          blockingOpen: [], blockingClosed: [], closed: (issueOpen ? false : true),
-                          closed_at: (issueOpen ? null : issue.closed_at)
+                          blockingOpen: [],
+                          blockingClosed: []
                         };
                       }
-                      allDepIssues = addBlockers(issueName, issueUrl, issueOpen, issue, allDepIssues);
+                      allDepIssues[issueName].title = issue.title;
+                      allDepIssues[issueName].url = issueUrl;
+                      allDepIssues[issueName].closed = (issueOpen ? false : true);
+                      allDepIssues[issueName].closed_at = (issueOpen ? null : issue.updated_at);
+
+                      // Add blocking issues for this issue
+                      allDepIssues = addBlockers(issueName, issueUrl, issueOpen, issue.body, issue, allDepIssues);
                     });
 
                     githubIssues.push({
