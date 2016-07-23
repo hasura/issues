@@ -44,7 +44,7 @@ const template = fs.readFileSync('/app/index.html');
 const mustache = require('mustache');
 const moment = require('moment');
 
-const needsRegex = /needs\s+(#\d+|github:\w+\/\w+#\d+|gitlab:\w+\/\w+#\d+)/gi;
+const needsRegex = /needs\s+(#\d+|github:[\w-]+\/[\w-]+#\d+|gitlab:[\w-]+\/[\w-]+#\d+)/gi;
 const app = express();
 const GITHUB = process.env.GITHUB;
 const GITLAB = process.env.GITLAB;
