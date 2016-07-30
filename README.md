@@ -1,12 +1,8 @@
-#To install
-```
-cd app
-npm install
-```
+# Installation
+* Run `npm install`, if not already.
+* Run this example that uses the StackExchange API.
+* Change the namespace, schema and other details on the `package.json` file to use your API server.
 
-#To run
-Configure ``env`` variables in ``sample.rundocker.sh``.
-```
-./sample.rundocker.sh
-```
-Head to ``http://<docker-host>:7030/milestone/<milestoneName>``
+# Usage
+* For development environment, run the commands `npm run start-dev`.
+* For production environment, run the command `npm run start-prod`.
