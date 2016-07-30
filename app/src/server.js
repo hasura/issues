@@ -1,5 +1,5 @@
 import Express from 'express';
-import path from 'path';
+// import path from 'path';
 // import PrettyError from 'pretty-error';
 import http from 'http';
 import morgan from 'morgan';
@@ -16,7 +16,7 @@ import {issueCompare, createPersonLoadList,
 import config from './config';
 import {projects, GITLAB, GITHUB, PROJECTNAME, DEADLINES} from './env';
 
-const template = fs.readFileSync('/app/index.html');
+const template = fs.readFileSync('./src/index.html');
 
 // const pretty = new PrettyError();
 const app = new Express();
@@ -28,7 +28,7 @@ if (global.__DEVELOPMENT__)
 else
   app.use(morgan('[:date[clf]]: :method :url :status :res[content-length] - :response-time ms'));
 
-app.use('/static', Express.static(path.join(__dirname, '..', 'static')));
+app.use('/static', Express.static('./static'));
 
 app.get('/milestone/:milestone', (req, res) => {
   if ((projects.gitlab && projects.gitlab.length > 0) || (projects.github && projects.github.length > 0)) {
