@@ -1,6 +1,8 @@
+/* eslint-disable no-throw-literal */
+/* eslint-disable no-param-reassign */
 import moment from 'moment';
 
-const initializeChartIssues = () => {
+const initializeChartIssues = (DEADLINES, milestone) => {
   const startDate = moment(DEADLINES[milestone].start);
   const endDate = moment(DEADLINES[milestone].end).add(1, 'days');
   const today = moment().format('YYYYMMDD');
@@ -60,4 +62,4 @@ const _addToChartIssues = (issue, chartIssues) => {
   return _chartIssues;
 };
 
-export {initializeChartIssues};
+export {initializeChartIssues, addToChartIssues};

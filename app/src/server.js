@@ -37,8 +37,8 @@ app.get('/milestone/:milestone', (req, res) => {
       onlyUser = req.query.user;
     }
 
-    let chartIssues = initializeChartIssues(milestone);
-    let allDepIssues = {};
+    let chartIssues = initializeChartIssues(DEADLINES, milestone);
+    // let allDepIssues = {};
 
     /* ********* GITLAB **************** */
     console.log(`Fetching from gitlab: ${JSON.stringify(projects.gitlab)}`);
@@ -79,7 +79,7 @@ app.get('/milestone/:milestone', (req, res) => {
                       projectNo: i,
                       noIssues: issues.length,
                       issues,
-                      milestone: mkFromGitlabMilestone(results, milestone)
+                      milestone: mkFromGitlabMilestone(results, milestone, p)
                     });
                     totalGitlab += issues.length;
 
@@ -183,7 +183,7 @@ app.get('/milestone/:milestone', (req, res) => {
           const title = createTitle(onlyUser, milestone, PROJECTNAME);
 
           // Create all the blocker issues from the issue dependency data structure
-          const blockerIssues = createBlockerIssues(allDepIssues, onlyUser);
+          // const blockerIssues = createBlockerIssues(allDepIssues, onlyUser);
 
           const output = mustache.render(template.toString(), {
             deadline: deadline.toDateString().toString().substr(0, 11),
@@ -199,7 +199,7 @@ app.get('/milestone/:milestone', (req, res) => {
             title,
             milestone,
             blockers: [],  // blockerIssues,
-            totalBlockers: blockerIssues.length,
+            totalBlockers: 0, // blockerIssues.length,
             allIssues: JSON.stringify(chartIssues)
           });
           res.send(output);

@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+
 const addToIssues = (issue, issues, onlyUser) => {
   if (!issue.isOpen) { // Discard if issue is closed
     return issues;
@@ -36,13 +38,13 @@ const issueCompare = (a, b) => {
 
 const createPersonLoadList = (people, totalTasks, onlyUser) => {
   const loadList = [];
-  for (const k in people) {
+  for (const k in people) { // eslint-disable-line no-restricted-syntax
     if (onlyUser) {
       if (onlyUser === k) {
-        loadList.push({name: k, number: people[k], width: (people[k]/totalTasks*100)});
+        loadList.push({name: k, number: people[k], width: (100 * (people[k] / totalTasks))});
       }
     } else {
-      people2.push({name: k, number: people[k], width: (people[k]/totalTasks*100)});
+      loadList.push({name: k, number: people[k], width: (100 * (people[k] / totalTasks))});
     }
   }
   return loadList;
