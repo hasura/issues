@@ -6,6 +6,7 @@ COPY app/static /app/static
 COPY app/hasuraconfig.js /app/hasuraconfig.js
 COPY app/package.json /app/package.json
 COPY app/runserver.sh /app/runserver.sh
+COPY app/.babelrc /app/.babelrc
 COPY app/server.babel.js /app/server.babel.js
 COPY app/src /app/src
 
