@@ -102,13 +102,6 @@
                     <td>{{number}}</td>
                   </tr>
                 {{/people}}
-                  <tr>
-                    <td class="relative-td">
-                      <div class="fill-td" style="width: {{unassignedWidth}}%;"></div>
-                      <b><i>unassigned</i></b>
-                    </td>
-                    <td><b>{{unassignedTasks}}</b></td>
-                  </tr>
               </tbody>
             </table>
           </div>
@@ -124,7 +117,7 @@
                 <a role="button" data-toggle="collapse" data-parent="#allGitlab" href="#gitlab-{{projectNo}}" aria-expanded="true" aria-controls="gitlab-{{projectNo}}">
                   {{project}}  ({{noIssues}})
                 </a>&nbsp;&nbsp;
-                &nbsp;&nbsp;&nbsp;<a target="_blank" href="https://gitlab.com/{{project}}/milestones/{{milestoneId}}" class="repo-link">View on Gitlab</a>
+                &nbsp;&nbsp;&nbsp;<a target="_blank" href="{{milestone.url}}" class="repo-link">View on Gitlab</a>
               </h4>
               <div class="container-fluid collapse{{expanded}}" id="gitlab-{{projectNo}}">
                 {{#issues}}
@@ -134,7 +127,7 @@
                         <div class="panel-heading">
                           <h3 class="panel-title">
                             <span class="grey">#{{iid}}</span>&nbsp; {{title}}
-                            <a target="_blank" href="https://gitlab.com/{{project}}/issues/{{iid}}">View on Gitlab</a></h3>
+                            <a target="_blank" href="{{url}}">View on Gitlab</a></h3>
                           </h3>
                         </div>
                         <div class="panel-body">
@@ -143,12 +136,12 @@
                         <div class="panel-footer">
                           {{#labels.length}}
                             {{#labels}}
-                            <span class="label label-primary">{{.}}</span>
+                            <span class="label label-primary">{{name}}</span>
                             {{/labels}}
                           {{/labels.length}}
                           &nbsp;&nbsp;
                           {{#assignee}}
-                            <span class="label label-default">{{assignee.name}}</span>
+                            <span class="label label-default">{{.}}</span>
                           {{/assignee}}
                         </div>
                       </div>
@@ -167,7 +160,7 @@
                 <a role="button" data-toggle="collapse" data-parent="#allGithub" href="#github-{{projectNo}}" aria-expanded="true" aria-controls="gitlab-{{projectNo}}">
                   {{project}}  ({{noIssues}})
                 </a>&nbsp;&nbsp;
-                &nbsp;&nbsp;&nbsp;<a target="_blank" href="{{milestoneUrl}}" class="repo-link">View on Github</a>
+                &nbsp;&nbsp;&nbsp;<a target="_blank" href="{{milestone.url}}" class="repo-link">View on Github</a>
               </h4>
               <div class="container-fluid collapse{{expanded}}" id="github-{{projectNo}}">
                 {{#issues}}
@@ -176,12 +169,12 @@
                       <div class="panel panel-default">
                         <div class="panel-heading">
                           <h3 class="panel-title">
-                            <span class="grey">#{{number}}</span>
+                            <span class="grey">#{{iid}}</span>
                             &nbsp; {{title}} &nbsp;
-                            <a target="_blank" href="{{html_url}}">View on Github</a>
+                            <a target="_blank" href="{{url}}">View on Github</a>
                         </div>
                         <div class="panel-body">
-                          <p>{{body}}</p>
+                          <p>{{description}}</p>
                         </div>
                         <div class="panel-footer">
                           {{#labels.length}}
@@ -191,7 +184,7 @@
                           {{/labels.length}}
                           &nbsp;&nbsp;
                           {{#assignee}}
-                            <span class="label label-default">{{assignee.login}}</span>
+                            <span class="label label-default">{{.}}</span>
                           {{/assignee}}
                         </div>
                       </div>

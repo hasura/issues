@@ -1,6 +1,6 @@
+/* eslint-disable no-throw-literal */
+
 import Express from 'express';
-// import path from 'path';
-// import PrettyError from 'pretty-error';
 import http from 'http';
 import morgan from 'morgan';
 
@@ -13,6 +13,7 @@ import {mkFromGitlabMilestone, mkFromGitlabIssue,
 import {issueCompare, createPersonLoadList, createTitle,
   countPerPerson, addToIssues, getDaysLeft} from './base';
 import {initializeChartIssues, addToChartIssues} from './chart';
+import {updateAllBlockers, createBlockerIssues} from './blockers';
 import config from './config';
 import {projects, USERS, GITLAB, GITHUB, PROJECTNAME, DEADLINES} from './env';
 
@@ -38,7 +39,7 @@ app.get('/milestone/:milestone', (req, res) => {
     }
 
     let chartIssues = initializeChartIssues(DEADLINES, milestone);
-    // let allDepIssues = {};
+    let allDepIssues = {};
 
     /* ********* GITLAB **************** */
     console.log(`Fetching from gitlab: ${JSON.stringify(projects.gitlab)}`);
@@ -57,7 +58,7 @@ app.get('/milestone/:milestone', (req, res) => {
                 response.text().then((data) => {
                   try {
                     const _results = JSON.parse(data);
-                    const results = _results.map((issue) => mkFromGitlabIssue(issue, USERS));
+                    const results = _results.map((issue) => mkFromGitlabIssue(issue, USERS, p));
 
                     let issues = [];
                     results.map((issue) => { // eslint-disable-line array-callback-return
@@ -71,7 +72,7 @@ app.get('/milestone/:milestone', (req, res) => {
                       chartIssues = addToChartIssues(issue, chartIssues, onlyUser);
 
                       // Update the blocking issue data structure
-                      // allDepIssues = updateAllBlockers(issue, allDepIssues);
+                      allDepIssues = updateAllBlockers(issue, allDepIssues, p, 'gitlab');
                     });
 
                     gitlabIssues.push({
@@ -108,6 +109,9 @@ app.get('/milestone/:milestone', (req, res) => {
     const githubPromises = projects.github.map((p, i) => {
       const projectName = p.name;
       const milestoneId = p.milestones[milestone];
+      if (!milestoneId) {
+        throw ('No milestone found in env configuration for project: ' + projectName);
+      }
       const promise = new Promise((resolve, reject) => {
         fetch(`https://api.github.com/repos/${projectName}/issues?milestone=${milestoneId}&state=open`,
           {headers: {
@@ -119,7 +123,7 @@ app.get('/milestone/:milestone', (req, res) => {
                 response.text().then((data) => {
                   try {
                     const _results = JSON.parse(data);
-                    const results = _results.map(issue => mkFromGithubIssue(issue));
+                    const results = _results.map(issue => mkFromGithubIssue(issue, USERS, projectName));
 
                     let issues = [];
                     results.map((issue) => { // eslint-disable-line array-callback-return
@@ -133,7 +137,7 @@ app.get('/milestone/:milestone', (req, res) => {
                       chartIssues = addToChartIssues(issue, chartIssues, onlyUser);
 
                       // Update the blocking issue data structure
-                      // allDepIssues = updateAllBlockers(issue, allDepIssues);
+                      allDepIssues = updateAllBlockers(issue, allDepIssues, projectName, 'github');
                     });
 
                     githubIssues.push({
@@ -141,7 +145,7 @@ app.get('/milestone/:milestone', (req, res) => {
                       projectNo: i,
                       noIssues: issues.length,
                       issues,
-                      milestone: mkFromGithubMilestone(results, milestone, milestoneId)
+                      milestone: mkFromGithubMilestone(projectName, milestone, milestoneId)
                     });
                     totalGithub += issues.length;
                     resolve();
@@ -172,7 +176,7 @@ app.get('/milestone/:milestone', (req, res) => {
 
           // Compile per person list
           const totalTasks = totalGitlab + totalGithub;
-          const personLoadList = createPersonLoadList(people, totalTasks);
+          const personLoadList = createPersonLoadList(people, totalTasks, onlyUser);
 
           // Computation for stuff that goes on the header
           const deadline = new Date(DEADLINES[milestone].end);
@@ -180,10 +184,10 @@ app.get('/milestone/:milestone', (req, res) => {
           const runRate = Math.ceil(totalTasks / daysLeft);
 
           // HTML <title>
-          const title = createTitle(onlyUser, milestone, PROJECTNAME);
+          const title = createTitle(PROJECTNAME, milestone, onlyUser);
 
           // Create all the blocker issues from the issue dependency data structure
-          // const blockerIssues = createBlockerIssues(allDepIssues, onlyUser);
+          const blockerIssues = createBlockerIssues(allDepIssues, onlyUser);
 
           const output = mustache.render(template.toString(), {
             deadline: deadline.toDateString().toString().substr(0, 11),
@@ -198,8 +202,8 @@ app.get('/milestone/:milestone', (req, res) => {
             expanded: (onlyUser ? ' in' : ''),
             title,
             milestone,
-            blockers: [],  // blockerIssues,
-            totalBlockers: 0, // blockerIssues.length,
+            blockers: blockerIssues,
+            totalBlockers: blockerIssues.length,
             allIssues: JSON.stringify(chartIssues)
           });
           res.send(output);

@@ -18,6 +18,10 @@ const addToIssues = (issue, issues, onlyUser) => {
 };
 
 const countPerPerson = (issue, people) => {
+  if (!issue.isOpen) {
+    return people;
+  }
+
   if (issue.assignee in people) {
     people[issue.assignee] += 1;
   } else {
