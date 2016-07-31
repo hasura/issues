@@ -23,9 +23,9 @@ const initializeChartIssues = (DEADLINES, milestone) => {
 };
 
 const addToChartIssues = (issue, chartIssues, onlyUser) => {
-  if (!issue.isOpen) {
-    return chartIssues;
-  }
+  // if (!issue.isOpen) {
+  //   return chartIssues;
+  // }
 
   if (onlyUser) {
     if (issue.assignee === onlyUser) {
@@ -38,11 +38,12 @@ const addToChartIssues = (issue, chartIssues, onlyUser) => {
 };
 
 const _addToChartIssues = (issue, chartIssues) => {
-  const opened = moment(issue.created_at).format('YYYYMMDD');
+  const opened = moment(issue.createdAt).format('YYYYMMDD');
 
   let closed;
-  if (issue.closed_at) {
-    closed = moment(issue.closed_at).format('YYYYMMDD');
+  if (issue.closedAt) {
+    closed = moment(issue.closedAt).format('YYYYMMDD');
+    console.log(issue.title);
   }
 
   const today = moment().format('YYYYMMDD');

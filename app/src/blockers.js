@@ -53,7 +53,7 @@ const updateAllBlockers = (issue, allDepIssues, projectName, provider) => {
   allDepIssues[issueName].title = issue.title;
   allDepIssues[issueName].url = issue.url;
   allDepIssues[issueName].closed = (!issue.open);
-  allDepIssues[issueName].closed_at = issue.closed_at;
+  allDepIssues[issueName].closed_at = issue.closedAt;
   allDepIssues[issueName]._issue = issue;
 
   // Add blocking issues for this issue
