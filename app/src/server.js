@@ -10,19 +10,17 @@ import mustache from 'mustache';
 
 import {mkFromGitlabMilestone, mkFromGitlabIssue,
   mkFromGithubIssue, mkFromGithubMilestone} from './issues';
-import {issueCompare, createPersonLoadList,
-  createBlockerIssues, createTitle, initializeChartIssues,
-  countPerPerson, addToChartIssues, updateAllBlockers, addToIssues, getDaysLeft} from './utils';
+import {issueCompare, createPersonLoadList, createTitle,
+  countPerPerson, addToIssues, getDaysLeft} from './base';
+import {initializeChartIssues, addToChartIssues} from './chart';
 import config from './config';
-import {projects, GITLAB, GITHUB, PROJECTNAME, DEADLINES} from './env';
+import {projects, USERS, GITLAB, GITHUB, PROJECTNAME, DEADLINES} from './env';
 
 const template = fs.readFileSync('./src/index.html');
 
-// const pretty = new PrettyError();
 const app = new Express();
 const server = new http.Server(app);
 
-// Express Logging Middleware
 if (global.__DEVELOPMENT__)
   app.use(morgan('combined'));
 else
@@ -59,7 +57,7 @@ app.get('/milestone/:milestone', (req, res) => {
                 response.text().then((data) => {
                   try {
                     const _results = JSON.parse(data);
-                    const results = _results.map((issue) => mkFromGitlabIssue(issue));
+                    const results = _results.map((issue) => mkFromGitlabIssue(issue, USERS));
 
                     let issues = [];
                     results.map((issue) => { // eslint-disable-line array-callback-return
@@ -73,7 +71,7 @@ app.get('/milestone/:milestone', (req, res) => {
                       chartIssues = addToChartIssues(issue, chartIssues, onlyUser);
 
                       // Update the blocking issue data structure
-                      allDepIssues = updateAllBlockers(issue, allDepIssues);
+                      // allDepIssues = updateAllBlockers(issue, allDepIssues);
                     });
 
                     gitlabIssues.push({
@@ -135,7 +133,7 @@ app.get('/milestone/:milestone', (req, res) => {
                       chartIssues = addToChartIssues(issue, chartIssues, onlyUser);
 
                       // Update the blocking issue data structure
-                      allDepIssues = updateAllBlockers(issue, allDepIssues);
+                      // allDepIssues = updateAllBlockers(issue, allDepIssues);
                     });
 
                     githubIssues.push({
@@ -200,7 +198,7 @@ app.get('/milestone/:milestone', (req, res) => {
             expanded: (onlyUser ? ' in' : ''),
             title,
             milestone,
-            blockers: blockerIssues,
+            blockers: [],  // blockerIssues,
             totalBlockers: blockerIssues.length,
             allIssues: JSON.stringify(chartIssues)
           });
