@@ -1,6 +1,7 @@
 FROM node:4.4.4
 
 COPY app/node_modules /app/node_modules
+RUN npm -g install phantomjs-prebuilt
 COPY app/bin /app/bin
 COPY app/static /app/static
 COPY app/hasuraconfig.js /app/hasuraconfig.js

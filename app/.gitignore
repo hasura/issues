@@ -3,3 +3,4 @@ dist
 tmp
 static/screenshots/
 .DS_STORE
+rundevserver.sh
