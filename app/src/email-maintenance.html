@@ -1,0 +1,21 @@
+Hi,<br/>
+<br/>
+Issues opened today: <b>{{noIssuesOpenedToday}}</b>
+{{#issuesOpenedToday.length}}
+<ul>
+  {{#issuesOpenedToday}}
+    <li>#{{iid}} - {{title}}</li>
+  {{/issuesOpenedToday}}
+</ul>
+{{/issuesOpenedToday.length}}
+<br/><br/>
+Issues closed today: <b>{{noIssuesClosedToday}}</b>
+{{#issuesClosedToday.length}}
+<ul>
+  {{#issuesClosedToday}}
+    <li>#{{iid}} - {{title}}</li>
+  {{/issuesClosedToday}}
+</ul>
+{{/issuesClosedToday.length}}
+<br/><br/>
+Total open issues: <b>{{totalOpenIssues}}</b>

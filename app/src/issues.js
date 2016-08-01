@@ -75,7 +75,9 @@ const mkFromGitlabMilestone = (milestoneIssues, milestone, projectName) => {
 
 const fetchFromGitlab = (projectName, milestone, gitlabToken, success) => {
   const promise = new Promise((resolve, reject) => {
-    fetch(`https://gitlab.com/api/v3/projects/${projectName.replace('/', '%2F')}/issues?milestone=${milestone}`,
+    const url = milestone ? `https://gitlab.com/api/v3/projects/${projectName.replace('/', '%2F')}/issues?milestone=${milestone}` :
+      `https://gitlab.com/api/v3/projects/${projectName.replace('/', '%2F')}/issues`;
+    fetch(url,
       {headers: {
         'Content-Type': 'application/json',
         'PRIVATE-TOKEN': `${gitlabToken}`
@@ -105,12 +107,21 @@ const fetchFromGitlab = (projectName, milestone, gitlabToken, success) => {
 
 const fetchFromGithub = (project, milestone, githubToken, success) => {
   const projectName = project.name;
-  const milestoneId = project.milestones[milestone];
-  if (!milestoneId) {
-    throw ('No milestone found in env configuration for project: ' + projectName);
+  let milestoneId;
+
+  if (milestone) {
+    milestoneId = project.milestones[milestone];
+    if (!milestoneId) {
+      throw ('No milestone found in env configuration for project: ' + projectName);
+    }
+  } else {
+    milestoneId = null;
   }
+
   const promise = new Promise((resolve, reject) => {
-    fetch(`https://api.github.com/repos/${projectName}/issues?milestone=${milestoneId}&state=open`,
+    const url = milestone ? `https://api.github.com/repos/${projectName}/issues?milestone=${milestoneId}` :
+      `https://api.github.com/repos/${projectName}/issues`;
+    fetch(url,
       {headers: {
         'Content-Type': 'application/json',
         Authorization: `token ${githubToken}`

@@ -16,11 +16,14 @@ import {issueCompare, createPersonLoadList, createTitle,
   countPerPerson, addToIssues, getDaysLeft} from './base';
 import {initializeChartIssues, addToChartIssues} from './chart';
 import {updateAllBlockers, createBlockerIssues} from './blockers';
+import {isToday, sendEmail} from './email';
 import config from './config';
-import {projects, USERS, GITLAB, GITHUB, PROJECTNAME, DEADLINES} from './env';
+import {projects, USERS, GITLAB, GITHUB, PROJECTNAME,
+  DEADLINES, INTERNAL_ENDPOINT, EXTERNAL_ENDPOINT, FROM_NAME} from './env';
 
 const template = fs.readFileSync('./src/index.html');
 const screenshotTemplate = fs.readFileSync('./src/screenshot.html');
+const maintenanceEmail = fs.readFileSync('./src/email-maintenance.html');
 
 const app = new Express();
 const server = new http.Server(app);
@@ -32,10 +35,13 @@ else
 
 app.use('/static', Express.static('./static'));
 
-app.get('/email/:milestone', (req, res) => {
-  const screenshotUrl = `${req.protocol}://${req.hostname}:${config.port}/screenshot/${req.params.milestone}`;
-  const filename = './static/screenshots/' + req.params.milestone + '-' + (new Date()).getTime().toString() + '.png';
-  exec(('phantomjs bin/screencapture.js ' + screenshotUrl + ' ' + filename + ' 1200 700'), (error, stdout, stderr) => {
+app.get('/email-screenshot/:milestone', (req, res) => {
+  const milestone = req.params.milestone;
+  const screenshotUrl = `${INTERNAL_ENDPOINT}/screenshot/${req.params.milestone}`;
+  const filename = req.params.milestone + '-' + (new Date()).getTime().toString() + '.png';
+  const dirFilename = './static/screenshots/' + filename;
+
+  exec(('phantomjs bin/screencapture.js ' + screenshotUrl + ' ' + dirFilename + ' 1200 700'), (error, stdout, stderr) => {
     if (error) {
       console.error(`exec error: ${error}`);
       res.status(500).send('Email could not be sent, since screencapture failed');
@@ -43,25 +49,114 @@ app.get('/email/:milestone', (req, res) => {
       console.log(`stdout: ${stdout}`);
       console.log(screenshotUrl);
       console.log(`stderr: ${stderr}`);
-      res.send('Email sent');
+
+      const _deadline = new Date(DEADLINES[milestone].end);
+      const deadline = _deadline.toDateString().toString().substr(0, 10);
+      const subject = `Sprint update for the "${req.params.milestone}" milestone`;
+      const content = `
+        Hi,<br/><br/>
+        For the <b>${req.params.milestone}</b> milestone ending on <b>${deadline}</b>, the sprint progress today is as below:<br/><br/>
+        <img src="${EXTERNAL_ENDPOINT}/static/screenshots/${filename}" />
+        <br/><br/>
+        Regards,<br/>
+        ${FROM_NAME}<br/><br/>
+        --<br/>
+        Powered by <a href="https://github.com/hasura/issues">hasura/issues</a>
+        `;
+      sendEmail(subject, content);
+      res.send(content);
     }
   });
 });
 
-app.get('/email/:milestone', (req, res) => {
-  const screenshotUrl = `${req.protocol}://${req.hostname}:${config.port}/screenshot/${req.params.milestone}`;
-  const filename = './static/screenshots/' + req.params.milestone + '-' + (new Date()).getTime().toString() + '.png';
-  exec(('phantomjs bin/screencapture.js ' + screenshotUrl + ' ' + filename + ' 1200 700'), (error, stdout, stderr) => {
-    if (error) {
-      console.error(`exec error: ${error}`);
-      res.status(500).send('Email could not be sent, since screencapture failed');
-    } else {
-      console.log(`stdout: ${stdout}`);
-      console.log(screenshotUrl);
-      console.log(`stderr: ${stderr}`);
-      res.send('Email sent');
-    }
-  });
+app.get('/email/maintenance', (req, res) => {
+  if ((projects.gitlab && projects.gitlab.length > 0) || (projects.github && projects.github.length > 0)) {
+    const milestone = null;
+
+    let totalOpenIssues = 0;
+    const issuesOpenedToday = [];
+    let noIssuesOpenedToday = 0;
+    const issuesClosedToday = [];
+    let noIssuesClosedToday = 0;
+
+    /* ********* GITLAB **************** */
+    console.log(`Fetching from gitlab: ${JSON.stringify(projects.gitlab)}`);
+    const gitlabPromises = projects.gitlab.map((p) => (
+      fetchFromGitlab(p, milestone, GITLAB, (data) => { // fetchFromGitlab returns a promise
+        const _results = JSON.parse(data);
+        const results = _results.map((issue) => mkFromGitlabIssue(issue, USERS, p));
+
+        results.map((issue) => { // eslint-disable-line array-callback-return
+          if (issue.isOpen) {
+            totalOpenIssues += 1;
+          }
+          if (isToday(issue.createdAt)) {
+            issuesOpenedToday.push(issue);
+            noIssuesOpenedToday += 1;
+          }
+          if (isToday(issue.closedAt)) {
+            issuesClosedToday.push(issue);
+            noIssuesClosedToday += 1;
+          }
+        });
+      })));
+
+    /* ********* GITHUB **************** */
+    console.log('Fetching from github: ' + JSON.stringify(projects.github));
+    const githubPromises = projects.github.map((p) => (
+      fetchFromGithub(p, milestone, GITHUB, (data, projectName) => {
+        const _results = JSON.parse(data);
+        const results = _results.map(issue => mkFromGithubIssue(issue, USERS, projectName));
+
+        results.map((issue) => { // eslint-disable-line array-callback-return
+          if (issue.isOpen) {
+            totalOpenIssues += 1;
+          }
+          if (isToday(issue.createdAt)) {
+            issuesOpenedToday.push(issue);
+            noIssuesOpenedToday += 1;
+          }
+          if (isToday(issue.closedAt)) {
+            issuesClosedToday.push(issue);
+            noIssuesClosedToday += 1;
+          }
+        });
+      })
+    ));
+
+    Promise.all(gitlabPromises.concat(githubPromises)).then(
+      () => {
+        try {
+          const output = mustache.render(maintenanceEmail.toString(), {
+            projectName: PROJECTNAME,
+            totalOpenIssues,
+            issuesOpenedToday,
+            noIssuesOpenedToday,
+            issuesClosedToday,
+            noIssuesClosedToday
+          });
+
+          const subject = `Work update for ${PROJECTNAME}`;
+          const content = `
+            ${output}<br/><br/>
+            Regards,<br/>
+            ${FROM_NAME}<br/><br/>
+            --<br/>
+            Powered by <a href="https://github.com/hasura/issues">hasura/issues</a>`;
+
+          sendEmail(subject, content);
+          res.send(content);
+        } catch (err) {
+          console.log(err.stack);
+          res.send(err);
+        }
+      },
+      (error) => {
+        res.send(error);
+      });
+  } else {
+    res.send('No projects specified');
+  }
 });
 
 app.get('/screenshot/:milestone', (req, res) => {
