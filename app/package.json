@@ -48,7 +48,7 @@
         "INTERNAL_ENDPOINT": "http://localhost:3000",
         "TO_EMAILS": "[\"tanmaig@34cross.in\", \"tanmaig@hasura.io\"]",
         "FROM_EMAIL": "tanmaig@34cross.in",
-        "FROM_NAME": "Tanmai"
+        "EMAIL_CRON": "0 * * * * *"
       }
     }
   },
@@ -60,6 +60,7 @@
     "morgan": "^1.7.0",
     "mustache": "^2.2.1",
     "node-fetch": "^1.5.3",
+    "node-schedule": "^1.1.1",
     "nodemon": "^1.10.0",
     "phantomjs-prebuilt": "^2.1.9",
     "pretty-error": "^1.2.0"

@@ -3,6 +3,8 @@
 import Express from 'express';
 import http from 'http';
 import morgan from 'morgan';
+import schedule from 'node-schedule';
+import fetch from 'node-fetch';
 
 import fs from 'fs';
 import mustache from 'mustache';
@@ -16,9 +18,10 @@ import {issueCompare, createPersonLoadList, createTitle,
   countPerPerson, addToIssues, getDaysLeft} from './base';
 import {initializeChartIssues, addToChartIssues} from './chart';
 import {updateAllBlockers, createBlockerIssues} from './blockers';
-import {isToday, sendEmail} from './email';
+import {isToday, hasTimeSpent} from './email';
+// import {isToday, sendEmail, hasTimeSpent} from './email';
 import config from './config';
-import {projects, USERS, GITLAB, GITHUB, PROJECTNAME,
+import {projects, USERS, GITLAB, GITHUB, PROJECTNAME, ACTIVE_MILESTONE, EMAIL_CRON,
   DEADLINES, INTERNAL_ENDPOINT, EXTERNAL_ENDPOINT, FROM_NAME} from './env';
 
 const template = fs.readFileSync('./src/index.html');
@@ -63,8 +66,8 @@ app.get('/email-screenshot/:milestone', (req, res) => {
         --<br/>
         Powered by <a href="https://github.com/hasura/issues">hasura/issues</a>
         `;
-      sendEmail(subject, content);
-      res.send(content);
+      // sendEmail(subject, content);
+      res.send(subject + '<br/>' + content);
     }
   });
 });
@@ -75,9 +78,8 @@ app.get('/email/maintenance', (req, res) => {
 
     let totalOpenIssues = 0;
     const issuesOpenedToday = [];
-    let noIssuesOpenedToday = 0;
     const issuesClosedToday = [];
-    let noIssuesClosedToday = 0;
+    let allResults = [];
 
     /* ********* GITLAB **************** */
     console.log(`Fetching from gitlab: ${JSON.stringify(projects.gitlab)}`);
@@ -85,20 +87,7 @@ app.get('/email/maintenance', (req, res) => {
       fetchFromGitlab(p, milestone, GITLAB, (data) => { // fetchFromGitlab returns a promise
         const _results = JSON.parse(data);
         const results = _results.map((issue) => mkFromGitlabIssue(issue, USERS, p));
-
-        results.map((issue) => { // eslint-disable-line array-callback-return
-          if (issue.isOpen) {
-            totalOpenIssues += 1;
-          }
-          if (isToday(issue.createdAt)) {
-            issuesOpenedToday.push(issue);
-            noIssuesOpenedToday += 1;
-          }
-          if (isToday(issue.closedAt)) {
-            issuesClosedToday.push(issue);
-            noIssuesClosedToday += 1;
-          }
-        });
+        allResults = [...allResults, ...results];
       })));
 
     /* ********* GITHUB **************** */
@@ -107,33 +96,31 @@ app.get('/email/maintenance', (req, res) => {
       fetchFromGithub(p, milestone, GITHUB, (data, projectName) => {
         const _results = JSON.parse(data);
         const results = _results.map(issue => mkFromGithubIssue(issue, USERS, projectName));
-
-        results.map((issue) => { // eslint-disable-line array-callback-return
-          if (issue.isOpen) {
-            totalOpenIssues += 1;
-          }
-          if (isToday(issue.createdAt)) {
-            issuesOpenedToday.push(issue);
-            noIssuesOpenedToday += 1;
-          }
-          if (isToday(issue.closedAt)) {
-            issuesClosedToday.push(issue);
-            noIssuesClosedToday += 1;
-          }
-        });
+        allResults = [...allResults, ...results];
       })
     ));
 
     Promise.all(gitlabPromises.concat(githubPromises)).then(
       () => {
         try {
+          allResults.map((issue) => { // eslint-disable-line array-callback-return
+            if (issue.isOpen) {
+              totalOpenIssues += 1;
+            }
+            if (isToday(issue.createdAt)) {
+              issuesOpenedToday.push(issue);
+            }
+            if (isToday(issue.closedAt)) {
+              issuesClosedToday.push(hasTimeSpent(issue));
+            }
+          });
           const output = mustache.render(maintenanceEmail.toString(), {
             projectName: PROJECTNAME,
             totalOpenIssues,
             issuesOpenedToday,
-            noIssuesOpenedToday,
+            noIssuesOpenedToday: issuesOpenedToday.length,
             issuesClosedToday,
-            noIssuesClosedToday
+            noIssuesClosedToday: issuesClosedToday.length
           });
 
           const subject = `Work update for ${PROJECTNAME}`;
@@ -144,8 +131,8 @@ app.get('/email/maintenance', (req, res) => {
             --<br/>
             Powered by <a href="https://github.com/hasura/issues">hasura/issues</a>`;
 
-          sendEmail(subject, content);
-          res.send(content);
+          // sendEmail(subject, content);
+          res.send(subject + content);
         } catch (err) {
           console.log(err.stack);
           res.send(err);
@@ -364,3 +351,31 @@ if (config.port) {
 } else {
   console.error('==>     ERROR: No PORT environment variable has been specified');
 }
+
+// Schedule the emails to be sent out
+schedule.scheduleJob(EMAIL_CRON, () => {
+  console.log('\nRUNNING JOB:');
+  if (ACTIVE_MILESTONE) {
+    fetch(`${INTERNAL_ENDPOINT}/email-screenshot/${ACTIVE_MILESTONE}`).then(response => {
+      console.log('Made request to send sprint email');
+      if (response.status >= 200 && response.status < 300) {
+        console.log('successfull');
+        response.text().then(d => (console.log(d)));
+      } else {
+        console.error('fail');
+        response.text().then(d => (console.error(d)));
+      }
+    });
+  } else {
+    fetch(`${INTERNAL_ENDPOINT}/email/maintenance`).then(response => {
+      console.log('Made request to send maintenance email');
+      if (response.status >= 200 && response.status < 300) {
+        console.log('successful');
+        response.text().then(d => (console.log(d)));
+      } else {
+        console.error('fail');
+        response.text().then(d => (console.error(d)));
+      }
+    });
+  }
+});

@@ -4,7 +4,7 @@ Issues opened today: <b>{{noIssuesOpenedToday}}</b>
 {{#issuesOpenedToday.length}}
 <ul>
   {{#issuesOpenedToday}}
-    <li>#{{iid}} - {{title}}</li>
+  <li><b><u>#{{iid}}</b></u> - {{title}}</li>
   {{/issuesOpenedToday}}
 </ul>
 {{/issuesOpenedToday.length}}
@@ -13,7 +13,10 @@ Issues closed today: <b>{{noIssuesClosedToday}}</b>
 {{#issuesClosedToday.length}}
 <ul>
   {{#issuesClosedToday}}
-    <li>#{{iid}} - {{title}}</li>
+    <li>
+      <b><u>#{{iid}}</b></u> - {{title}}
+      {{#timeSpent}}<ul><li> Time spent: {{timeSpent}} hours </li></ul>{{/timeSpent}}
+    </li>
   {{/issuesClosedToday}}
 </ul>
 {{/issuesClosedToday.length}}

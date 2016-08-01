@@ -12,6 +12,16 @@ const isToday = (timestamp) => {
   return (time === today);
 };
 
+const hasTimeSpent = (issue) => {
+  const timeRegex = /timespent:\s+(\d+)h|(\d+\.5)h/gi;
+  const match = timeRegex.exec(issue.description);
+  if (match) {
+    issue.timeSpent = match[1];
+    return issue;
+  }
+  return issue;
+};
+
 const sendEmail = (subject, html) => {
   const url = 'https://api.sparkpost.com/api/v1/transmissions';
   const toEmails = JSON.parse(TO_EMAILS);
@@ -48,4 +58,4 @@ const sendEmail = (subject, html) => {
       });
 };
 
-export {isToday, sendEmail};
+export {isToday, sendEmail, hasTimeSpent};
