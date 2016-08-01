@@ -1,3 +1,5 @@
 node_modules
 dist
 tmp
+static/screenshots/
+.DS_STORE

@@ -70,7 +70,7 @@ const createBlockerIssues = (allDepIssues, onlyUser) => {
     if (b.closed) {
       return false;
     }
-    if (onlyUser && !(b._issue.assignee === onlyUser)) {
+    if (onlyUser && !(b.data._issue.assignee === onlyUser)) {
       return false;
     }
     if ((b.data.blockingOpen.length === 0) &&

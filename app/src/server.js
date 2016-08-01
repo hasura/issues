@@ -4,12 +4,14 @@ import Express from 'express';
 import http from 'http';
 import morgan from 'morgan';
 
-import fetch from 'node-fetch';
 import fs from 'fs';
 import mustache from 'mustache';
 
+import {exec} from 'child_process';
+
 import {mkFromGitlabMilestone, mkFromGitlabIssue,
-  mkFromGithubIssue, mkFromGithubMilestone} from './issues';
+  mkFromGithubIssue, mkFromGithubMilestone,
+  fetchFromGitlab, fetchFromGithub} from './issues';
 import {issueCompare, createPersonLoadList, createTitle,
   countPerPerson, addToIssues, getDaysLeft} from './base';
 import {initializeChartIssues, addToChartIssues} from './chart';
@@ -18,6 +20,7 @@ import config from './config';
 import {projects, USERS, GITLAB, GITHUB, PROJECTNAME, DEADLINES} from './env';
 
 const template = fs.readFileSync('./src/index.html');
+const screenshotTemplate = fs.readFileSync('./src/screenshot.html');
 
 const app = new Express();
 const server = new http.Server(app);
@@ -28,6 +31,94 @@ else
   app.use(morgan('[:date[clf]]: :method :url :status :res[content-length] - :response-time ms'));
 
 app.use('/static', Express.static('./static'));
+
+app.get('/email/:milestone', (req, res) => {
+  const screenshotUrl = `${req.protocol}://${req.hostname}:${config.port}/screenshot/${req.params.milestone}`;
+  const filename = './static/screenshots/' + req.params.milestone + '-' + (new Date()).getTime().toString() + '.png';
+  exec(('phantomjs bin/screencapture.js ' + screenshotUrl + ' ' + filename + ' 1200 700'), (error, stdout, stderr) => {
+    if (error) {
+      console.error(`exec error: ${error}`);
+      res.status(500).send('Email could not be sent, since screencapture failed');
+    } else {
+      console.log(`stdout: ${stdout}`);
+      console.log(screenshotUrl);
+      console.log(`stderr: ${stderr}`);
+      res.send('Email sent');
+    }
+  });
+});
+
+app.get('/email/:milestone', (req, res) => {
+  const screenshotUrl = `${req.protocol}://${req.hostname}:${config.port}/screenshot/${req.params.milestone}`;
+  const filename = './static/screenshots/' + req.params.milestone + '-' + (new Date()).getTime().toString() + '.png';
+  exec(('phantomjs bin/screencapture.js ' + screenshotUrl + ' ' + filename + ' 1200 700'), (error, stdout, stderr) => {
+    if (error) {
+      console.error(`exec error: ${error}`);
+      res.status(500).send('Email could not be sent, since screencapture failed');
+    } else {
+      console.log(`stdout: ${stdout}`);
+      console.log(screenshotUrl);
+      console.log(`stderr: ${stderr}`);
+      res.send('Email sent');
+    }
+  });
+});
+
+app.get('/screenshot/:milestone', (req, res) => {
+  if ((projects.gitlab && projects.gitlab.length > 0) || (projects.github && projects.github.length > 0)) {
+    const milestone = req.params.milestone;
+
+    let chartIssues = initializeChartIssues(DEADLINES, milestone);
+
+    /* ********* GITLAB **************** */
+    console.log(`Fetching from gitlab: ${JSON.stringify(projects.gitlab)}`);
+    const gitlabPromises = projects.gitlab.map((p) => (
+      fetchFromGitlab(p, milestone, GITLAB, (data) => { // fetchFromGitlab returns a promise
+        const _results = JSON.parse(data);
+        const results = _results.map((issue) => mkFromGitlabIssue(issue, USERS, p));
+
+        results.map((issue) => { // eslint-disable-line array-callback-return
+          // Add to the chart issues data structre
+          chartIssues = addToChartIssues(issue, chartIssues);
+        });
+      })));
+
+    /* ********* GITHUB **************** */
+    console.log('Fetching from github: ' + JSON.stringify(projects.github));
+    const githubPromises = projects.github.map((p) => (
+      fetchFromGithub(p, milestone, GITHUB, (data, projectName) => {
+        const _results = JSON.parse(data);
+        const results = _results.map(issue => mkFromGithubIssue(issue, USERS, projectName));
+
+        results.map((issue) => { // eslint-disable-line array-callback-return
+          // Add to the chart issues data structre
+          chartIssues = addToChartIssues(issue, chartIssues);
+        });
+      })
+    ));
+
+    Promise.all(gitlabPromises.concat(githubPromises)).then(
+      () => {
+        try {
+          // HTML <title>
+          const title = createTitle(PROJECTNAME, milestone);
+          const output = mustache.render(screenshotTemplate.toString(), {
+            title,
+            allIssues: JSON.stringify(chartIssues)
+          });
+          res.send(output);
+        } catch (err) {
+          console.log(err.stack);
+          res.send(err);
+        }
+      },
+      (error) => {
+        res.send(error);
+      });
+  } else {
+    res.send('No projects specified');
+  }
+});
 
 app.get('/milestone/:milestone', (req, res) => {
   if ((projects.gitlab && projects.gitlab.length > 0) || (projects.github && projects.github.length > 0)) {
@@ -46,125 +137,70 @@ app.get('/milestone/:milestone', (req, res) => {
     let people = {};
     const gitlabIssues = [];
     let totalGitlab = 0;
-    const gitlabPromises = projects.gitlab.map((p, i) => {
-      const promise = new Promise((resolve, reject) => {
-        fetch(`https://gitlab.com/api/v3/projects/${p.replace('/', '%2F')}/issues?milestone=${milestone}`,
-          {headers: {
-            'Content-Type': 'application/json',
-            'PRIVATE-TOKEN': `${GITLAB}`
-          }}).then(
-            (response) => {
-              if (response.status >= 200 && response.status < 300) {
-                response.text().then((data) => {
-                  try {
-                    const _results = JSON.parse(data);
-                    const results = _results.map((issue) => mkFromGitlabIssue(issue, USERS, p));
+    const gitlabPromises = projects.gitlab.map((p, i) => (
+      fetchFromGitlab(p, milestone, GITLAB, (data) => { // fetchFromGitlab returns a promise
+        const _results = JSON.parse(data);
+        const results = _results.map((issue) => mkFromGitlabIssue(issue, USERS, p));
 
-                    let issues = [];
-                    results.map((issue) => { // eslint-disable-line array-callback-return
-                      // Add to main issues datastructure
-                      issues = addToIssues(issue, issues, onlyUser);
+        let issues = [];
+        results.map((issue) => { // eslint-disable-line array-callback-return
+          // Add to main issues datastructure
+          issues = addToIssues(issue, issues, onlyUser);
 
-                      // Increase counter
-                      people = countPerPerson(issue, people);
+          // Increase counter
+          people = countPerPerson(issue, people);
 
-                      // Add to the chart issues data structre
-                      chartIssues = addToChartIssues(issue, chartIssues, onlyUser);
+          // Add to the chart issues data structre
+          chartIssues = addToChartIssues(issue, chartIssues, onlyUser);
 
-                      // Update the blocking issue data structure
-                      allDepIssues = updateAllBlockers(issue, allDepIssues, p, 'gitlab');
-                    });
+          // Update the blocking issue data structure
+          allDepIssues = updateAllBlockers(issue, allDepIssues, p, 'gitlab');
+        });
 
-                    gitlabIssues.push({
-                      project: p,
-                      projectNo: i,
-                      noIssues: issues.length,
-                      issues,
-                      milestone: mkFromGitlabMilestone(results, milestone, p)
-                    });
-                    totalGitlab += issues.length;
-
-                    resolve();
-                  } catch (err) {
-                    console.log(err.stack);
-                    reject(err.toString());
-                  }
-                });
-                return;
-              }
-              reject(p + ':: ' + response.status.toString() + ': ' + response.statusText);
-            },
-            (error) => {
-              reject(p + ':: failed to fetch from gitlab: ' + error.message);
-            }
-          );
-      });
-      return promise;
-    });
+        gitlabIssues.push({
+          project: p,
+          projectNo: i,
+          noIssues: issues.length,
+          issues,
+          milestone: mkFromGitlabMilestone(results, milestone, p)
+        });
+        totalGitlab += issues.length;
+      })));
 
     /* ********* GITHUB **************** */
     console.log('Fetching from github: ' + JSON.stringify(projects.github));
     const githubIssues = [];
     let totalGithub = 0;
-    const githubPromises = projects.github.map((p, i) => {
-      const projectName = p.name;
-      const milestoneId = p.milestones[milestone];
-      if (!milestoneId) {
-        throw ('No milestone found in env configuration for project: ' + projectName);
-      }
-      const promise = new Promise((resolve, reject) => {
-        fetch(`https://api.github.com/repos/${projectName}/issues?milestone=${milestoneId}&state=open`,
-          {headers: {
-            'Content-Type': 'application/json',
-            Authorization: `token ${GITHUB}`
-          }}).then(
-            (response) => {
-              if (response.status >= 200 && response.status < 300) {
-                response.text().then((data) => {
-                  try {
-                    const _results = JSON.parse(data);
-                    const results = _results.map(issue => mkFromGithubIssue(issue, USERS, projectName));
+    const githubPromises = projects.github.map((p, i) => (
+      fetchFromGithub(p, milestone, GITHUB, (data, projectName, milestoneId) => {
+        const _results = JSON.parse(data);
+        const results = _results.map(issue => mkFromGithubIssue(issue, USERS, projectName));
 
-                    let issues = [];
-                    results.map((issue) => { // eslint-disable-line array-callback-return
-                      // Add to main issues datastructure
-                      issues = addToIssues(issue, issues, onlyUser);
+        let issues = [];
+        results.map((issue) => { // eslint-disable-line array-callback-return
+          // Add to main issues datastructure
+          issues = addToIssues(issue, issues, onlyUser);
 
-                      // Increase counter
-                      people = countPerPerson(issue, people);
+          // Increase counter
+          people = countPerPerson(issue, people);
 
-                      // Add to the chart issues data structre
-                      chartIssues = addToChartIssues(issue, chartIssues, onlyUser);
+          // Add to the chart issues data structre
+          chartIssues = addToChartIssues(issue, chartIssues, onlyUser);
 
-                      // Update the blocking issue data structure
-                      allDepIssues = updateAllBlockers(issue, allDepIssues, projectName, 'github');
-                    });
+          // Update the blocking issue data structure
+          allDepIssues = updateAllBlockers(issue, allDepIssues, projectName, 'github');
+        });
 
-                    githubIssues.push({
-                      project: projectName,
-                      projectNo: i,
-                      noIssues: issues.length,
-                      issues,
-                      milestone: mkFromGithubMilestone(projectName, milestone, milestoneId)
-                    });
-                    totalGithub += issues.length;
-                    resolve();
-                  } catch (err) {
-                    console.log(err.stack);
-                    reject(err.toString());
-                  }
-                });
-                return;
-              }
-              reject(p + ':: ' + response.status.toString() + ': ' + response.statusText);
-            },
-            (error) => {
-              reject(p + ':: failed to fetch from github: ' + error.message);
-            }
-          );
-      });
-      return promise;
-    });
+        githubIssues.push({
+          project: projectName,
+          projectNo: i,
+          noIssues: issues.length,
+          issues,
+          milestone: mkFromGithubMilestone(projectName, milestone, milestoneId)
+        });
+        totalGithub += issues.length;
+      })
+    ));
 
     Promise.all(gitlabPromises.concat(githubPromises)).then(
       () => {

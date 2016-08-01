@@ -1,3 +1,6 @@
+/* eslint-disable no-throw-literal */
+import fetch from 'node-fetch';
+
 const mkIssue = () => ({
   iid: null,
   title: null,
@@ -70,4 +73,69 @@ const mkFromGitlabMilestone = (milestoneIssues, milestone, projectName) => {
   return _m;
 };
 
-export {mkFromGitlabIssue, mkFromGithubIssue, mkFromGithubMilestone, mkFromGitlabMilestone};
+const fetchFromGitlab = (projectName, milestone, gitlabToken, success) => {
+  const promise = new Promise((resolve, reject) => {
+    fetch(`https://gitlab.com/api/v3/projects/${projectName.replace('/', '%2F')}/issues?milestone=${milestone}`,
+      {headers: {
+        'Content-Type': 'application/json',
+        'PRIVATE-TOKEN': `${gitlabToken}`
+      }}).then(
+        (response) => {
+          if (response.status >= 200 && response.status < 300) {
+            response.text().then((data) => {
+              try {
+                success(data);
+                resolve();
+              } catch (err) {
+                console.log(err.stack);
+                reject(err.toString());
+              }
+            });
+            return;
+          }
+          reject(projectName + ':: ' + response.status.toString() + ': ' + response.statusText);
+        },
+        (error) => {
+          reject(projectName + ':: failed to fetch from gitlab: ' + error.message);
+        }
+      );
+  });
+  return promise;
+};
+
+const fetchFromGithub = (project, milestone, githubToken, success) => {
+  const projectName = project.name;
+  const milestoneId = project.milestones[milestone];
+  if (!milestoneId) {
+    throw ('No milestone found in env configuration for project: ' + projectName);
+  }
+  const promise = new Promise((resolve, reject) => {
+    fetch(`https://api.github.com/repos/${projectName}/issues?milestone=${milestoneId}&state=open`,
+      {headers: {
+        'Content-Type': 'application/json',
+        Authorization: `token ${githubToken}`
+      }}).then(
+        (response) => {
+          if (response.status >= 200 && response.status < 300) {
+            response.text().then((data) => {
+              try {
+                success(data, projectName, milestoneId);
+                resolve();
+              } catch (err) {
+                console.log(err.stack);
+                reject(err.toString());
+              }
+            });
+            return;
+          }
+          reject(project.name + ':: ' + response.status.toString() + ': ' + response.statusText);
+        },
+        (error) => {
+          reject(project.name + ':: failed to fetch from github: ' + error.message);
+        }
+      );
+  });
+  return promise;
+};
+
+export {mkFromGitlabIssue, mkFromGithubIssue, mkFromGithubMilestone, mkFromGitlabMilestone, fetchFromGitlab, fetchFromGithub};

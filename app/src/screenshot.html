@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{title}} - pending issues</title>
+
+    <!-- Bootstrap -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style>
+      #myChart {
+        width: 100%;
+        height: 300px;
+      }
+      .relative-td {
+        position: relative;
+        font-weight: bold;
+      }
+      .fill-td {
+        position: absolute;
+        top: 0px;
+        background: rgba(152, 200, 246, 0.8) none repeat scroll 0% 0%;
+        bottom: 0px;
+        width: 90%;
+        left: 0px;
+        z-index: -1;
+      }
+      .panel-title {
+        font-size: 14px;
+      }
+      .panel-title a {
+        color: #666;
+        font-size: 0.8em;
+      }
+      a.repo-link {
+        color: #666;
+        font-size: 0.8em;
+        text-decoration: none;
+        font-weight: normal;
+      }
+      .panel-footer {
+        font-size: 0.8em;
+      }
+      .grey {
+        color: #666;
+      }
+      /*
+      ul {
+        list-style: none;
+      } */
+    </style>
+    <script type="text/javascript">
+      var allIssues = {{& allIssues}};
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <hr/>
+      <div class="row">
+        <div id="totalOpen" class="col-md-6"></div>
+        <div id="totalClosed" class="col-md-6"></div>
+      </div>
+      <hr/>
+      <div class="container">
+        <canvas id="myChart"></canvas>
+      </div>
+    </div>
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.6/Chart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+          var lastClosed = allIssues.length;
+          for (var i=0; i < allIssues.length; i++) {
+            if (allIssues[i].closed === undefined || allIssues[i].closed === null) {
+              lastClosed = i;
+              break;
+            }
+          }
+          $('#totalOpen').html('<b>Total open issues today:</b> ' + allIssues[lastClosed - 1].open.toString());
+          $('#totalClosed').html('<b>Total closed issues today:</b> ' + allIssues[lastClosed - 1].closed.toString());
+        var ctx = $('#myChart');
+        var chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: allIssues.map(function (ai) { return ai.date; }),
+            datasets: [
+              {
+                label: 'Total',
+                data: allIssues.map(function(ai) { return ai.open; }),
+                backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                borderColor: 'rgba(255,99,132,1)',
+                borderWidth: 1
+              },
+              {
+                label: 'Closed',
+                data: allIssues.map(function(ai) { return ai.closed; }),
+                backgroundColor: 'rgba(75, 192, 192, 0.3)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+              }
+            ]
+          },
+          options: {
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: false
+                }
+              }]
+            }
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

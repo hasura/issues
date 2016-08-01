@@ -39,9 +39,9 @@
         "NODE_PATH": "./src",
         "NODE_ENV": "development",
         "PORT": 3000,
-        "PROJECTS":"{\"gitlab\": [\"hasura/shukra-ui\", \"hasura/hasura-ui\", \"hasura/danava\", \"hasura/shukra\",\"hasura/platform-release\", \"hasura/hasura-hauthy2\", \"hasura/hasura-portal\", \"hasura/hasura-gateway\", \"hasura/srishti\"], \"github\": [{\"name\": \"hasura/support\", \"milestones\": {\"danava\": 1, \"casper\": 2}}, {\"name\": \"0x777/raven\", \"milestones\": {\"danava\": 3, \"casper\": 5}}, {\"name\": \"hasura/baas-sdk-java\", \"milestones\": {\"danava\": 1, \"casper\": 2}}]}",
+        "PROJECTS": "{\"gitlab\": [\"hasura/shukra-ui\", \"hasura/hasura-ui\", \"hasura/danava\", \"hasura/shukra\",\"hasura/platform-release\", \"hasura/hasura-hauthy2\", \"hasura/hasura-portal\", \"hasura/hasura-gateway\", \"hasura/srishti\"], \"github\": [{\"name\": \"hasura/support\", \"milestones\": {\"danava\": 1, \"casper\": 2}}, {\"name\": \"0x777/raven\", \"milestones\": {\"danava\": 3, \"casper\": 5}}, {\"name\": \"hasura/baas-sdk-java\", \"milestones\": {\"danava\": 1, \"casper\": 2}}]}",
         "DEADLINES": "{\"casper\": {\"start\": \"2016-07-24\", \"end\": \"2016-08-08\"}}",
-        "USERS":"{\"0x777\": \"vamshi\", \"rayanon\": \"anon\", \"tanmaig\" : \"tanmai\", \"shahidh\": \"shahidh\", \"nizar.m\": \"nizar\", \"coco98\": \"tanmai\"}",
+        "USERS": "{\"0x777\": \"vamshi\", \"rayanon\": \"anon\", \"tanmaig\" : \"tanmai\", \"shahidh\": \"shahidh\", \"nizar.m\": \"nizar\", \"coco98\": \"tanmai\"}",
         "PROJECTNAME": "Hasura"
       }
     }
@@ -55,6 +55,7 @@
     "mustache": "^2.2.1",
     "node-fetch": "^1.5.3",
     "nodemon": "^1.10.0",
+    "phantomjs-prebuilt": "^2.1.9",
     "pretty-error": "^1.2.0"
   },
   "devDependencies": {

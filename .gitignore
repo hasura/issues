@@ -1,3 +1,4 @@
 rundocker.sh
 node_modules
 npm-debug.log
+.DS_STORE

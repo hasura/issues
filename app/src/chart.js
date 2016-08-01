@@ -43,7 +43,6 @@ const _addToChartIssues = (issue, chartIssues) => {
   let closed;
   if (issue.closedAt) {
     closed = moment(issue.closedAt).format('YYYYMMDD');
-    console.log(issue.title);
   }
 
   const today = moment().format('YYYYMMDD');
