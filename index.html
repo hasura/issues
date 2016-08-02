@@ -22,7 +22,7 @@
       <h3>
 <a id="what-is-hasuraissues" class="anchor" href="#what-is-hasuraissues" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What is hasura/issues?</h3>
 
-<p><em>hasura/issues</em> is a simple view that pulls data from github and gitlab repos that helps the entire team understand project progress. It also has a few utilities to automatically send out emails, show blocking tasks and extract time spent on a task.</p>
+<p><em>hasura/issues</em> is a simple view that pulls data from github and gitlab repos that helps the entire team understand porgress across the entire project. It also has a few utilities to automatically send out emails, show blocking tasks and extract time spent on a task.</p>
 
 <h3>
 <a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h3>
@@ -34,6 +34,27 @@
 <li>Automatic progress progress emails for an active milestone</li>
 <li>Automatic daily report of issues opened and closed in case of no active milestone</li>
 </ol>
+
+<hr>
+
+<h3>
+<a id="annotating-issues-with-metadata" class="anchor" href="#annotating-issues-with-metadata" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Annotating issues with metadata</h3>
+
+<p>Metadata about issues (blocking task dependency) and time spent on the issue is extracted from the issue description.</p>
+
+<h5>
+<a id="blocking-task" class="anchor" href="#blocking-task" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Blocking task</h5>
+
+<p>Say, there is an issue on a <code>gitlab</code> project <code>myorg/myrepo</code> called <code>#8 A big block</code>.</p>
+
+<p>Say there is an issue in the same project that depends on the issue above <code>#23 Some stuff has to be done before this can be done</code>. In that case, add the following in the issue description (<strong>not issue comments</strong>) saying: <code>needs #8</code>.</p>
+
+<p>Say there is an issue in some other project that depends on <code>#8 A big block</code>, add this to the issue description: <code>needs gitlab:myorg/myrepo#8</code>.</p>
+
+<h5>
+<a id="time-spent" class="anchor" href="#time-spent" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Time spent</h5>
+
+<p>To annotate how much time was spend on an issue, add the following to the issue description: <code>timespent: 7h</code> or <code>timespent: 7.5h</code>.</p>
 
 <h3>
 <a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration</h3>
@@ -83,12 +104,13 @@ Here's a list of env vars, what they mean and how to configure them</p>
 <li>
 <code>INTERNAL_ENDPOINT</code>: <code>http://localhost:8080</code> or <code>http://app.projectX</code> (URI where this tracker is accessible for services on the same server)</li>
 <li>
-<code>ACTIVE_MILESTONE</code>: <code>milestone_x</code>
-</li>
+<code>ACTIVE_MILESTONE</code>: <code>milestone_x</code> (if this env var is present, a progress chart will be sent as an email, if this env var is absent, a simple project update with issues closed today &amp; time spent on them will be sent out)</li>
 <li>
 <code>SPARKPOST_KEY</code>: <code>XXXX_YOUR_SPARKPOST_KEY</code>
 </li>
 </ul>
+
+<hr>
 
 <h3>
 <a id="endpoints" class="anchor" href="#endpoints" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Endpoints</h3>
@@ -96,7 +118,7 @@ Here's a list of env vars, what they mean and how to configure them</p>
 <ol>
 <li><code>/milestone/:milestone</code></li>
 <li>
-<code>/email/maintenance</code> Will send out issue report email</li>
+<code>/email/maintenance</code> Will send out issue report email (in case no <code>ACTIVE_MILESTONE</code>)</li>
 <li>
 <code>/email-screenshot/:milestone</code> Will send out milestone progress email</li>
 </ol>
