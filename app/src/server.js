@@ -18,8 +18,7 @@ import {issueCompare, createPersonLoadList, createTitle,
   countPerPerson, addToIssues, getDaysLeft} from './base';
 import {initializeChartIssues, addToChartIssues} from './chart';
 import {updateAllBlockers, createBlockerIssues} from './blockers';
-import {isToday, hasTimeSpent} from './email';
-// import {isToday, sendEmail, hasTimeSpent} from './email';
+import {isToday, sendEmail, hasTimeSpent} from './email';
 import config from './config';
 import {projects, USERS, GITLAB, GITHUB, PROJECTNAME, ACTIVE_MILESTONE, EMAIL_CRON,
   DEADLINES, INTERNAL_ENDPOINT, EXTERNAL_ENDPOINT, FROM_NAME} from './env';
@@ -66,7 +65,7 @@ app.get('/email-screenshot/:milestone', (req, res) => {
         --<br/>
         Powered by <a href="https://github.com/hasura/issues">hasura/issues</a>
         `;
-      // sendEmail(subject, content);
+      sendEmail(subject, content);
       res.send(subject + '<br/>' + content);
     }
   });
@@ -131,7 +130,7 @@ app.get('/email/maintenance', (req, res) => {
             --<br/>
             Powered by <a href="https://github.com/hasura/issues">hasura/issues</a>`;
 
-          // sendEmail(subject, content);
+          sendEmail(subject, content);
           res.send(subject + content);
         } catch (err) {
           console.log(err.stack);
