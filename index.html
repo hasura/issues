@@ -45,7 +45,7 @@ No extra tools, no multiple sources of truth about what is going on for develope
 <a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration</h3>
 
 <p>hasura/issues is a node service that is deployed per project. All configuration is only via env variables.
-Here's a list of env vars, what they mean and how to configure them:</p>
+Here's a list of env vars, what they mean and how to configure them</p>
 
 <ol>
 <li>
@@ -55,14 +55,79 @@ Here's a list of env vars, what they mean and how to configure them:</p>
 <code>GITHUB</code>: <code>XXXX_YOUR_GITHUB_API_TOKENXXXX</code>
 </li>
 <li>
-<code>MILESTONES</code>: <code>{"milestone_x": {"start": "YYYY-MM-DD", "end": "YYYY-MM-DD"}, "milestone_y"...}</code>
+<code>DEADLINES</code>: <code>{"milestone_x": {"start": "YYYY-MM-DD", "end": "YYYY-MM-DD"}, "milestone_y"...}</code>
 </li>
+<li>
+<code>PROJECTS</code>:</li>
+</ol>
+
+<pre><code>{
+  "gitlab": ["group/repo", "group2/repo2"],
+  "github": [
+    {"name":"user/repo", "milestones":{"milestone_x": 1, "milestone_y": 2}},
+    {"name": "user2/repo2", "milestones":{"milestone_x": 7, "milestone_y": 9}}
+]}
+</code></pre>
+
+<ol>
+<li>
+<code>USERS</code>: <code>{"github_username": "normalized_username", "ramu99": "ramu"}</code>
+</li>
+<li>
+<code>PROJECTNAME</code>: <code>My Project</code>
+</li>
+<li>
+<code>FROM_NAME</code>: <code>Ramu</code> (used for signing off on automated email report)</li>
+<li>
+<code>FROM_EMAIL</code>: <code>ramu@ramu.com</code> (used as the reply-to on automated emails)</li>
+<li>
+<code>TO_EMAILS</code>: <code>["stakeholder1@gmail.com", "dev1@gmail.com", "manager@foo.com", "ramu@ramu.com"]</code> (JSON array of recipients of automated emails)</li>
+<li>
+<code>EMAIL_CRON</code>: <code>0 0 8 * * *</code> (cron schedule, GMT, to send out emails. This is 8AM daily)</li>
+<li>
+<code>EXTERNAL_ENDPOINT</code>: <code>http://issues.mysite.com</code> or <code>https://app.projectX.hasura-app.io</code> (URI where this tracker is publicly accessible, required for screenshot images sent via email)</li>
+<li>
+<code>INTERNAL_ENDPOINT</code>: <code>http://localhost:8080</code> or <code>http://app.projectX</code> (URI where this tracker is accessible for services on the same server)</li>
+<li>
+<code>ACTIVE_MILESTONE</code>: <code>milestone_x</code>
+</li>
+<li>
+<code>SPARKPOST_KEY</code>: <code>XXXX_YOUR_SPARKPOST_KEY</code>
+</li>
+</ol>
+
+<h3>
+<a id="endpoints" class="anchor" href="#endpoints" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Endpoints</h3>
+
+<ol>
+<li><code>/milestone/:milestone</code></li>
+<li>
+<code>/email/maintenance</code> Will send out issue report email</li>
+<li>
+<code>/email-screenshot/:milestone</code> Will send out milestone progress email</li>
 </ol>
 
 <h3>
 <a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Support or Contact</h3>
 
-<p>Please use the <a href="https://github.com/hasura/issues/issues">issue tracker</a> (ohmygod) to file issues and raise any support requests!</p>
+<p>Please use the (ohmygod) <a href="https://github.com/hasura/issues/issues">issue tracker</a> to file issues and raise any support requests!</p>
+
+<h3>
+<a id="to-install" class="anchor" href="#to-install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>To install</h3>
+
+<pre><code>cd app
+npm install
+</code></pre>
+
+<h3>
+<a id="to-run" class="anchor" href="#to-run" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>To run</h3>
+
+<p>Configure <code>env</code> variables in <code>sample.rundocker.sh</code>.</p>
+
+<pre><code>./sample.rundocker.sh
+</code></pre>
+
+<p>Head to <code>http://&lt;docker-host&gt;:7030/milestone/&lt;milestoneName&gt;</code></p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/hasura/issues">hasura/issues</a> is maintained by <a href="https://github.com/hasura">hasura</a>.</span>
