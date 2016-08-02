@@ -22,13 +22,7 @@
       <h3>
 <a id="what-is-hasuraissues" class="anchor" href="#what-is-hasuraissues" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What is hasura/issues?</h3>
 
-<p>hasura/issues is a simple view that pulls data from github and gitlab repos that helps the entire team understand project progress. It also has a few utilities to automatically send out emails, show blocking tasks and extract time spent on a task (using issue description). </p>
-
-<h3>
-<a id="why-this-tool" class="anchor" href="#why-this-tool" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Why this tool?</h3>
-
-<p>The idea is to remove all overhead with task tracking and project progress.
-No extra tools, no multiple sources of truth about what is going on for developers, project managers etc.</p>
+<p><em>hasura/issues</em> is a simple view that pulls data from github and gitlab repos that helps the entire team understand project progress. It also has a few utilities to automatically send out emails, show blocking tasks and extract time spent on a task (using issue description). </p>
 
 <h3>
 <a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h3>
@@ -113,21 +107,12 @@ Here's a list of env vars, what they mean and how to configure them</p>
 <p>Please use the (ohmygod) <a href="https://github.com/hasura/issues/issues">issue tracker</a> to file issues and raise any support requests!</p>
 
 <h3>
-<a id="to-install" class="anchor" href="#to-install" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>To install</h3>
-
-<pre><code>cd app
-npm install
-</code></pre>
-
-<h3>
 <a id="to-run" class="anchor" href="#to-run" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>To run</h3>
 
-<p>Configure <code>env</code> variables in <code>sample.rundocker.sh</code>.</p>
-
-<pre><code>./sample.rundocker.sh
+<pre><code>docker run [-e all the env vars] hasura/issues:&lt;tag&gt;
 </code></pre>
 
-<p>Head to <code>http://&lt;docker-host&gt;:7030/milestone/&lt;milestoneName&gt;</code></p>
+<p>Images from <a href="https://hub.docker.com/r/hasura/issues/tags/">docker hub</a></p>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/hasura/issues">hasura/issues</a> is maintained by <a href="https://github.com/hasura">hasura</a>.</span>
