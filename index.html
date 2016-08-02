@@ -2,7 +2,7 @@
 <html lang="en-us">
   <head>
     <meta charset="UTF-8">
-    <title>Issues by hasura</title>
+    <title>hasura/issues by hasura</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
@@ -11,8 +11,8 @@
   </head>
   <body>
     <section class="page-header">
-      <h1 class="project-name">Issues</h1>
-      <h2 class="project-tagline">Lightweight PM tools to track issues &amp; milestones across multiple repos for a single project</h2>
+      <h1 class="project-name">hasura/issues</h1>
+      <h2 class="project-tagline">No project management. Just issues.</h2>
       <a href="https://github.com/hasura/issues" class="btn">View on GitHub</a>
       <a href="https://github.com/hasura/issues/zipball/master" class="btn">Download .zip</a>
       <a href="https://github.com/hasura/issues/tarball/master" class="btn">Download .tar.gz</a>
@@ -25,27 +25,43 @@
 <p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here <a href="https://guides.github.com/features/mastering-markdown/">using GitHub Flavored Markdown</a>, select a template crafted by a designer, and publish. After your page is generated, you can check out the new <code>gh-pages</code> branch locally. If you’re using GitHub Desktop, simply sync your repository and you’ll see the new branch.</p>
 
 <h3>
-<a id="designer-templates" class="anchor" href="#designer-templates" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Designer Templates</h3>
+<a id="what-is-hasuraissues" class="anchor" href="#what-is-hasuraissues" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What is hasura/issues?</h3>
 
-<p>We’ve crafted some handsome templates for you to use. Go ahead and click 'Continue to layouts' to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved.</p>
-
-<h3>
-<a id="creating-pages-manually" class="anchor" href="#creating-pages-manually" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating pages manually</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+<p>hasura/issues is a simple view that pulls data from github and gitlab repos that helps the entire team understand project progress. It also has a few utilities to automatically send out emails, show blocking tasks and extract time spent on a task (using issue description). </p>
 
 <h3>
-<a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<a id="why-this-tool" class="anchor" href="#why-this-tool" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Why this tool?</h3>
 
-<p>You can <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/#mentioning-users-and-teams" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor’s GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p>The idea is to remove all overhead with task tracking and project progress.
+No extra tools, no multiple sources of truth about what is going on for developers, project managers etc.</p>
+
+<h3>
+<a id="features" class="anchor" href="#features" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Features</h3>
+
+<ol>
+<li>Project progress</li>
+<li>List issues for the same milestone across github, gitlab repos</li>
+<li>Parse issue description to show blocking tasks</li>
+<li>Automatic progress progress emails for an active milestone</li>
+<li>Automatic daily report of issues opened and closed in case of no active milestone</li>
+</ol>
+
+<h3>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Configuration</h3>
+
+<p>hasura/issues is a node service that is deployed per project. All configuration is only via env variables.
+Here's a list of env vars, what they mean and how to configure them
+1. <code>GITLAB</code>: <code>XXXX_YOUR_GITLAB_API_TOKENXXXX</code>
+2. <code>GITHUB</code>: <code>XXXX_YOUR_GITHUB_API_TOKENXXXX</code>
+3. <code>MILESTONES</code>: <code>{"milestone_x": {"start": "YYYY-MM-DD", "end": "YYYY-MM-DD"}, "milestone_y"...}</code></p>
 
 <h3>
 <a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Support or Contact</h3>
 
-<p>Having trouble with Pages? Check out our <a href="https://help.github.com/pages">documentation</a> or <a href="https://github.com/contact">contact support</a> and we’ll help you sort it out.</p>
+<p>Please use the <a href="https://github.com/hasura/issues/issues">issue tracker</a> (ohmygod) to file issues and raise any support requests!</p>
 
       <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/hasura/issues">Issues</a> is maintained by <a href="https://github.com/hasura">hasura</a>.</span>
+        <span class="site-footer-owner"><a href="https://github.com/hasura/issues">hasura/issues</a> is maintained by <a href="https://github.com/hasura">hasura</a>.</span>
 
         <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
