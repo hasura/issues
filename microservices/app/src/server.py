@@ -234,6 +234,7 @@ def issue_from_github(issue):
         'repo': issue['repository_url'].split('/')[-1],
         'issue_no': issue['number'],
         'is_bug': is_bug(issue),
+        'is_longterm': is_longterm(issue),
         'assigned_members': [m['login'] for m in issue['assignees']],
         'closed': not(not(issue['closed_at'])),
         'closed_at': issue['closed_at']
