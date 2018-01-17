@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "issue" ADD COLUMN "is_bug" boolean NUll
-  type: run_sql

@@ -1,3 +1,0 @@
-- args:
-    sql: ALTER TABLE "issue" ADD COLUMN "is_longerm" boolean NOT NULL DEFAULT false
-  type: run_sql
