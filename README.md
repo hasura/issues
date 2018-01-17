@@ -2,7 +2,7 @@
 Github hooks + sync APIs that load issue data into postgres.
 Use metabase for project management.
 
-#### Webhook to upsert issue info
+### Webhook to upsert issue info
 This github webhook will upsert issue info:
 
 ```http
@@ -10,7 +10,7 @@ GET
 https://app.cluster.hasura-app.io/webhook
 ```
 
-#### Initialise org members
+### Initialise org members
 This API call will upsert members:
 
 ```http
@@ -18,7 +18,7 @@ GET
 https://app.cluster.hasura-app.io/add_org_members
 ```
 
-#### Initialise org repos
+### Initialise org repos
 This API call will upsert members:
 
 ```http
@@ -26,8 +26,8 @@ GET
 https://app.cluster.hasura-app.io/add_org_repos
 ```
 
-#### Initialise issues on a repo
-This API call will upsert issues from the repo:
+### Initialise issues on a repo
+This API call will upsert issues from the given repo:
 
 ```http
 GET
