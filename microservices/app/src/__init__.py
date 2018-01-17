@@ -8,3 +8,4 @@ from .hasura import hasura_examples
 app.register_blueprint(hasura_examples)
 
 from .server import *
+

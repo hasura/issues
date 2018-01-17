@@ -163,6 +163,50 @@ def sync_issues(repo):
 
     return Response(generate(url), mimetype='text/plain')
 
+@app.route('/save_snapshot')
+def save_pulse():
+    # Get metrics at exactly this point
+    unassigned_issues = 0
+    open_issues = 0
+    open_bugs = 0
+
+    # Fetch this data
+    data = fetch_current_metrics()
+    if not(data):
+        return 'could-not-fetch'
+
+    unassigned_issues = data[0]['count']
+    open_issues = data[1]['count']
+    open_bugs = data[2]['count']
+    url = 'http://data.hasura/v1/query'
+    body = {
+        "type": "insert",
+        "args": {
+            "table": "metrics_snapshots",
+            "objects": [
+                {
+                    "type": "unassigned_issues",
+                    "value": unassigned_issues
+                },
+                {
+                    "type": "open_issues",
+                    "value": open_issues
+                },
+                {
+                    "type": "open_bugs",
+                    "value": open_bugs
+                }
+            ]
+        }
+    }
+    res = requests.post(url, data=json.dumps(body))
+    print (res.text)
+
+    if res.status_code == 200:
+        return 'inserted'
+    else:
+        return 'failure-to-insert'
+
 
 ############################ HELPERS ###################################
 
@@ -173,6 +217,14 @@ def is_bug(issue):
             is_bug = True
             break
     return is_bug
+
+def is_longterm(issue):
+    is_longterm = False
+    for l in issue['labels']:
+        if ('longterm' in l['name']):
+            is_longterm = True
+            break
+    return is_longterm
 
 def issue_from_github(issue):
     return {
@@ -233,3 +285,66 @@ def save_last_page(repo, thing, thing_url):
     body['args']['$set'][thing] = thing_url
     res = requests.post(url, data=json.dumps(body))
     print ('Updated: ' + repo + ' ' + thing + ' ' + thing_url + ' ' + res.text)
+
+
+def fetch_current_metrics():
+    url = "http://data.hasura/v1/query"
+
+    # This is the json payload for the query
+    requestPayload = {
+        "type": "bulk",
+        "args": [
+            {
+                "type": "count",
+                "args": {
+                    "table": "unassigned_issues",
+                    "where": {
+                        "closed": {
+                            "$ne": "true"
+                        }
+                    }
+                }
+            },
+            {
+                "type": "count",
+                "args": {
+                    "table": "member_issues",
+                    "where": {
+                        "closed": {
+                            "$ne": "true"
+                        }
+                    }
+                }
+            },
+            {
+                "type": "count",
+                "args": {
+                    "table": "member_issues",
+                    "where": {
+                        "$and": [
+                            {
+                                "closed": {
+                                    "$ne": "true"
+                                }
+                            },
+                            {
+                                "is_bug": {
+                                    "$eq": "true"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+
+    # Make the query and store response in resp
+    resp = requests.request("POST", url, data=json.dumps(requestPayload))
+
+    # resp.content contains the json response.
+    if resp.status_code == 200:
+        return json.loads(resp.text)
+    else:
+        print (resp.text)
+        return None

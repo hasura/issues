@@ -1,0 +1,7 @@
+- args:
+    sql: |-
+      create view closing_rate as (select login, avg(DATE_PART('day', closed_at - created)) closing_rate from member_issues
+      where closed = true and created > '2017-11-15T00:00:00+00:00'
+      group by login
+      order by closing_rate desc);
+  type: run_sql

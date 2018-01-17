@@ -1,0 +1,4 @@
+- args:
+    sql: create view member_issues as (select * from member, issue where issue.assigned_members
+      ? member.login);
+  type: run_sql

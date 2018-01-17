@@ -24,3 +24,9 @@ remotes:
 
     # Add output of `hasura conf generate-remote` below this line
 
+
+    '{{ cluster.metadata.namespaces.user }}.cron':
+      cron:
+        dockerfile: microservices/cron/src/Dockerfile
+        path: microservices/cron/src
+

@@ -1,0 +1,9 @@
+- args:
+    sql: |-
+      create view workload as (select closing_rate.login, (closing_rate.closing_rate * open_issues.count) as work_days from closing_rate, (SELECT count(*) AS "count", "public"."member_issues"."login" AS "login"
+      FROM "public"."member_issues"
+      WHERE "public"."member_issues"."closed" = FALSE
+      GROUP BY "public"."member_issues"."login"
+      ORDER BY "count" DESC, "public"."member_issues"."login" ASC) open_issues
+      where closing_rate.login = open_issues.login);
+  type: run_sql

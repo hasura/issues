@@ -1,0 +1,8 @@
+- args:
+    sql: CREATE TABLE "metrics_snapshots"("created" timestamptz NOT NULL DEFAULT now(),
+      "type" text NOT NULL, "value" bigint NOT NULL, PRIMARY KEY ("created","type")
+      )
+  type: run_sql
+- args:
+    name: metrics_snapshots
+  type: add_existing_table_or_view

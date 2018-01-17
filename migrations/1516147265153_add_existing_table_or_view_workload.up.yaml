@@ -1,0 +1,3 @@
+- args:
+    name: workload
+  type: add_existing_table_or_view
