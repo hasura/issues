@@ -38,22 +38,33 @@ You need to call this API for each repo in the `repo` table.
 
 -----------------------------------------------------------
 
-All of this can be used to create a metabase dashboard like this:
+## Assumptions:
+
+- label that contains the string bug is assumed to be a bug type label
+- label that contains the string longterm is assuemed to be a low-priority long-term issue
+
+-----------------------------------------------------------
+
+## Desired metrics to be captured
 
 **Unassigned issues**
+Triaging speed: Open issues that haven't been assigned to people.
 ![unassigned-issues](https://raw.githubusercontent.com/hasura/issues/master/screenshots/unassigned-issues.png)
 
+
 **Open issues/bugs**
+Work load: Open issues that have been assigned to people and that are not longterm issues
 ![open-issues-bugs](https://raw.githubusercontent.com/hasura/issues/master/screenshots/open-issues-open-bugs.png)
 
 **Closing rate / dev**
+Rough estimate of per developer efficiency:
+Time it takes for an issue to go from created to done
 ![closing-rate](https://raw.githubusercontent.com/hasura/issues/master/screenshots/avg-days-to-close-issue-per-dev.png)
 
 **Total days of work ahead / dev**
+Closing rate * open issues: How many days in the future will the developer spend on getting their work done
 ![workload](https://raw.githubusercontent.com/hasura/issues/master/screenshots/total-days-required-by-each-dev-to-close-open-issues.png)
 
 -----------------------------------------------------------
 
-## Assumptions:
 
-- label that contains the word bug is assumed to be a bug type label
