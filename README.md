@@ -51,3 +51,9 @@ All of this can be used to create a metabase dashboard like this:
 
 **Total days of work ahead / dev**
 ![workload](https://raw.githubusercontent.com/hasura/issues/master/screenshots/total-days-required-by-each-dev-to-close-open-issues.png)
+
+-----------------------------------------------------------
+
+## Assumptions:
+
+- label that contains the word bug is assumed to be a bug type label
