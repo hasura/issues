@@ -5,9 +5,9 @@ items:
   metadata:
     creationTimestamp: null
     labels:
-      app: app
+      app: metabase
       hasuraService: custom
-    name: app
+    name: metabase
     namespace: '{{ cluster.metadata.namespaces.user }}'
   spec:
     replicas: 1
@@ -16,26 +16,33 @@ items:
       metadata:
         creationTimestamp: null
         labels:
-          app: app
+          app: metabase
       spec:
         containers:
-        - image: hasura/hello-world:latest
+        - image: metabase/metabase:latest
           env:
-          - name: PRODUCTION
-            value: "true"
-          - name: GITHUB_ORG
-            value: "hasura"
-          - name: CLUSTER_NAME
-            value: {{ cluster.name }}
-          - name: GITHUB_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: hasura-secrets
-                key: github.token
+            - name: MB_DB_TYPE
+              value: postgres
+            - name: MB_DB_DBNAME
+              value: hasuradb
+            - name: MB_DB_PORT
+              value: "5432"
+            - name: MB_DB_USER
+              valueFrom:
+                secretKeyRef:
+                  key: postgres.user
+                  name: hasura-secrets
+            - name: MB_DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  key: postgres.password
+                  name: hasura-secrets
+            - name: MB_DB_HOST
+              value: postgres.hasura
           imagePullPolicy: IfNotPresent
-          name: app
+          name: metabase
           ports:
-          - containerPort: 8080
+          - containerPort: 3000
             protocol: TCP
           resources: {}
         securityContext: {}
@@ -46,17 +53,17 @@ items:
   metadata:
     creationTimestamp: null
     labels:
-      app: app
+      app: metabase
       hasuraService: custom
-    name: app
+    name: metabase
     namespace: '{{ cluster.metadata.namespaces.user }}'
   spec:
     ports:
     - port: 80
       protocol: TCP
-      targetPort: 8080
+      targetPort: 3000
     selector:
-      app: app
+      app: metabase
     type: ClusterIP
   status:
     loadBalancer: {}

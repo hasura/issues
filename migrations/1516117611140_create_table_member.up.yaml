@@ -1,0 +1,6 @@
+- args:
+    sql: CREATE TABLE "member"("login" text NOT NULL, PRIMARY KEY ("login") )
+  type: run_sql
+- args:
+    name: member
+  type: add_existing_table_or_view

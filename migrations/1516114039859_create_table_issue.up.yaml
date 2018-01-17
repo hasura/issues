@@ -1,0 +1,10 @@
+- args:
+    sql: CREATE TABLE "issue"("id" bigint NOT NULL, "title" text NOT NULL, "created"
+      timestamptz NOT NULL, "assigned_member_login" text NOT NULL, "assigned_on" timestamptz
+      NOT NULL, "project_title" text NOT NULL, "project_added_on" timestamptz NOT
+      NULL, "done_on" timestamptz NOT NULL, "released_on" timestamptz NOT NULL, "closed"
+      boolean NOT NULL DEFAULT false, PRIMARY KEY ("id") )
+  type: run_sql
+- args:
+    name: issue
+  type: add_existing_table_or_view

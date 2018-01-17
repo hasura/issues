@@ -1,5 +1,6 @@
 flask
 requests
 gunicorn
+gevent
 
 # add new packages one per each line

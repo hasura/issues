@@ -1,0 +1,8 @@
+- args:
+    sql: |-
+      ALTER TABLE "issue" ALTER COLUMN "assigned_on" DROP NOT NULL;
+      ALTER TABLE "issue" ALTER COLUMN "project_title" DROP NOT NULL;
+      ALTER TABLE "issue" ALTER COLUMN "project_added_on" DROP NOT NULL;
+      ALTER TABLE "issue" ALTER COLUMN "done_on" DROP NOT NULL;
+      ALTER TABLE "issue" ALTER COLUMN "released_on" DROP NOT NULL;
+  type: run_sql

@@ -1,0 +1,4 @@
+- args:
+    sql: create view unassigned_issues as (select * from issue where jsonb_array_length(assigned_members)
+      = 0);
+  type: run_sql

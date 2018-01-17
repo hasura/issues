@@ -169,5 +169,18 @@ app:
     upstreamServicePath: /
     upstreamServicePort: 80
     corsPolicy: allow_all
+    locationDirectives: |
+      proxy_buffering off;
 
 # To see actual endpoints for these routes, use `$ hasura microserivce list`
+
+metabase:
+  /:
+    corsPolicy: allow_all
+    upstreamService:
+      name: metabase
+      namespace: '{{ cluster.metadata.namespaces.user }}'
+    upstreamServicePath: /
+    upstreamServicePort: 80
+
+

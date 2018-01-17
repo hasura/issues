@@ -1,0 +1,9 @@
+- args:
+    sql: ALTER TABLE "issue" ALTER COLUMN "assigned_member_login" TYPE text;
+  type: run_sql
+- args:
+    sql: ALTER TABLE "issue" ALTER COLUMN "assigned_member_login" DROP DEFAULT;
+  type: run_sql
+- args:
+    sql: ALTER TABLE "issue" ALTER COLUMN "assigned_member_login" DROP NOT NULL;
+  type: run_sql

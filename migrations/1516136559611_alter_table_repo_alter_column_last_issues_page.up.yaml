@@ -1,0 +1,9 @@
+- args:
+    sql: ALTER TABLE "repo" ALTER COLUMN "last_issues_page" TYPE text;
+  type: run_sql
+- args:
+    sql: ALTER TABLE "repo" ALTER COLUMN "last_issues_page" DROP DEFAULT;
+  type: run_sql
+- args:
+    sql: ALTER TABLE "repo" ALTER COLUMN "last_issues_page" DROP NOT NULL;
+  type: run_sql
