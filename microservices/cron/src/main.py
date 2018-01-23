@@ -7,9 +7,12 @@ my_cron = CronTab(tabfile='my_cron.tab')
 job  = my_cron.new(command='python /usr/src/app/save.py')
 job.hour.every(12)
 
+job2  = my_cron.new(command='python /usr/src/app/save_hub.py')
+job2.hour.every(12)
+
 # Write cron jobs to cron tab file
 my_cron.write()
 
 # Run the scheduler
 for result in my_cron.run_scheduler():
-    print ('Made the api call: http://app.default/save_snapshot')
+    print (result)

@@ -3,11 +3,12 @@ from src import app
 from flask import request, Response
 # from flask import jsonify
 import requests, json
-import time
+import time, datetime
 
 ORG=os.getenv('GITHUB_ORG')
 TOKEN=os.getenv('GITHUB_TOKEN')
 headers = {'Authorization': 'token ' + TOKEN}
+hasura_headers = {'Authorization': 'Bearer ' + os.getenv('HASURA_IO_TOKEN')}
 
 @app.route('/')
 def stream():
@@ -206,6 +207,63 @@ def save_pulse():
         return 'inserted'
     else:
         return 'failure-to-insert'
+
+@app.route('/save_hub_pulls_snapshot/<date>')
+def save_hub_pulse(date):
+    # List important tags
+    important_tags = ['react', 'react-native', 'python', 'nodejs', 'php', 'java', 'chatbot', 'jupyter', 'data science']
+
+    # Fetch all tags from Hasura
+    # print('Fetching all tags', flush=True)
+    # url = 'https://data.hasura.io/v1/query'
+    # body = {'args': {'columns': ['name'], 'table': 'hub_tags'}, 'type': 'select'}
+    # res = requests.post(url, data=json.dumps(body))
+    # if not(res.status_code == 200):
+    #     print (res.text, flush=True)
+    #     return 'could-not-fetch-tags'
+    # tags = [t['name'] for t in json.loads(res.text)]
+
+    # Fetch all pulls per tag
+    if date == 'today':
+        date = datetime.datetime.now().strftime('%Y-%m-%d')
+    print('Fetching all pulls per tag for ' + date, flush=True)
+    url = 'https://data.hasura.io/v1/query'
+    body = {
+        'args': {
+            'columns': ['*'],
+            'table': 'hub_tag_pulls',
+            'where': {
+                'date': {'$eq': date}
+            }
+        },
+        'type': 'select'
+    }
+    res = requests.post(url, headers=hasura_headers, data=json.dumps(body))
+    if not(res.status_code == 200):
+        print (res.text, flush=True)
+        return 'could-not-fetch-tag-pulls'
+    objects = [{'tag': t['name'], 'at': t['date'], 'pulls': t['pulls']} for t in json.loads(res.text)]
+
+    # Insert this data!
+    print('Inserting snapshot data', flush=True)
+    url = 'http://data.hasura/v1/query'
+    body = {
+        'args':
+            {'objects': objects,
+                'table': 'hub_pulls',
+                'on_conflict':  {
+                    "action": "update",
+                    "constraint_on": ["tag", "at"]
+                }
+            },
+        'type': 'insert'
+    }
+    res = requests.post(url, data=json.dumps(body))
+    if not(res.status_code == 200):
+        print (res.text, flush=True)
+        return 'could-not-insert-hub-pulls'
+
+    return 'inserted-hub-pulls'
 
 
 ############################ HELPERS ###################################

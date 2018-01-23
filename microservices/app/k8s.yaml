@@ -11,7 +11,11 @@ items:
     namespace: '{{ cluster.metadata.namespaces.user }}'
   spec:
     replicas: 1
-    strategy: {}
+    strategy:
+      rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 0
+      type: RollingUpdate
     template:
       metadata:
         creationTimestamp: null
@@ -32,6 +36,11 @@ items:
               secretKeyRef:
                 name: hasura-secrets
                 key: github.token
+          - name: HASURA_IO_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: hasura-secrets
+                key: hasura-io.token
           imagePullPolicy: IfNotPresent
           name: app
           ports:

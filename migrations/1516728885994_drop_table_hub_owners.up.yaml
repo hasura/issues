@@ -1,0 +1,3 @@
+- args:
+    sql: DROP TABLE "hub_owners"
+  type: run_sql
