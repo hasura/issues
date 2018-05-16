@@ -1,6 +1,3 @@
-description: A boilerplate project for python-flask with a sample schema and integration
-  with Hasura data APIs.
-keywords: python, python3, flask, boilerplate
-media: {}
 name: hello-python-flask
 platformVersion: v0.15.21
+version: v1

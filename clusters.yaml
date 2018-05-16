@@ -1,7 +1,10 @@
+clusters:
 - alias: hasura
-  config:
-    configmap: controller-conf
-    namespace: hasura
   data: null
-  kubeContext: abhor52
-  name: abhor52
+  infra:
+    provider: hasura-free
+- alias: new
+  data: null
+  infra:
+    provider: hasura-free
+version: v1
