@@ -8,7 +8,7 @@ import time, datetime
 ORG=os.getenv('GITHUB_ORG')
 TOKEN=os.getenv('GITHUB_TOKEN')
 headers = {'Authorization': 'token ' + TOKEN}
-hasura_headers = {'Authorization': 'Bearer ' + os.getenv('HASURA_IO_TOKEN')}
+#hasura_headers = {'Authorization': 'Bearer ' + os.getenv('HASURA_IO_TOKEN')}
 
 @app.route('/')
 def stream():
@@ -238,7 +238,7 @@ def save_hub_pulse(date):
         },
         'type': 'select'
     }
-    res = requests.post(url, headers=hasura_headers, data=json.dumps(body))
+    res = requests.post(url, data=json.dumps(body))
     if not(res.status_code == 200):
         print (res.text, flush=True)
         return 'could-not-fetch-tag-pulls'
