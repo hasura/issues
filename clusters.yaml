@@ -6,5 +6,18 @@ clusters:
 - alias: new
   data: null
   infra:
-    provider: hasura-free
+    nodes:
+    - labels:
+        app: postgres
+      type: s-2vcpu-4gb
+    provider: digital-ocean
+    region: sfo2
+    version: v1
+    volumes:
+    - name: postgres
+      size: 10
+    - name: filestore
+      size: 1
+    - name: sessionstore
+      size: 1
 version: v1
