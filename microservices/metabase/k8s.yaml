@@ -20,9 +20,6 @@ items:
       spec:
         containers:
         - image: metabase/metabase:latest
-          resources:
-            limits:
-              memory: "512Mi"
           env:
             - name: MB_DB_TYPE
               value: postgres
