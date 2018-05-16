@@ -36,11 +36,6 @@ items:
               secretKeyRef:
                 name: hasura-secrets
                 key: github.token
-          - name: HASURA_IO_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: hasura-secrets
-                key: hasura-io.token
           imagePullPolicy: IfNotPresent
           name: app
           ports:
