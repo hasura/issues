@@ -1,7 +1,0 @@
-- args:
-    sql: CREATE TABLE "hub_owners"("owner" text NOT NULL, "tags" jsonb NOT NULL, PRIMARY
-      KEY ("owner") )
-  type: run_sql
-- args:
-    name: hub_owners
-  type: add_existing_table_or_view

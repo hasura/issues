@@ -1,9 +1,0 @@
-- args:
-    sql: ALTER TABLE "hub_pulls" ALTER COLUMN "at" TYPE date;
-  type: run_sql
-- args:
-    sql: ALTER TABLE ONLY "hub_pulls" ALTER COLUMN "at" SET DEFAULT now();
-  type: run_sql
-- args:
-    sql: ALTER TABLE "hub_pulls" ALTER COLUMN "at" SET NOT NULL;
-  type: run_sql

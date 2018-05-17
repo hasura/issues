@@ -1,7 +1,0 @@
-- args:
-    sql: CREATE TABLE "hub_pulls"("tag" text NOT NULL, "at" timestamptz NOT NULL,
-      "pulls" integer NOT NULL, PRIMARY KEY ("tag","at") )
-  type: run_sql
-- args:
-    name: hub_pulls
-  type: add_existing_table_or_view
