@@ -345,7 +345,6 @@ def save_last_page(repo, thing, thing_url):
     res = requests.post(url, data=json.dumps(body))
     print ('Updated: ' + repo + ' ' + thing + ' ' + thing_url + ' ' + res.text)
 
-
 def fetch_current_metrics():
     url = "http://data.hasura/v1/query"
 
