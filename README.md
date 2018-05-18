@@ -4,6 +4,14 @@ Use metabase for project management.
 
 For setup/installation instructions refer to: [Usage guide](guide.md).
 
+
+## How it works
+
+This application initialises github org data and then syncs changes from github using a webhook. All this data in initialised and synced into a postgres database.
+Once data is in postgres, you can use metabase 🐘🎉🐘🎉
+
+![hasura-issues](https://i.imgur.com/IK0TMO7.png)
+
 ### Webhook to upsert issue info
 
 This github webhook will upsert issue info into postgres when issues get created/updated on github:
@@ -39,11 +47,6 @@ https://app.cluster.hasura-app.io/<repo>/sync_issues
 
 You need to call this API for each repo in the `repo` table.
 
-You can also initialize all the issues of all the repos. Use this API:
-
-```http
-GET https://app.cluster.hasura-app.io/sync_all_repos
-```
 -----------------------------------------------------------
 
 ## Assumptions:
