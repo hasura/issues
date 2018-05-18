@@ -113,11 +113,13 @@ That's it. Once you're logged in, start creating questions and browsing data.
 
 **Head to your webhooks section on github:**
 
-[https://github.com/organizations/hasura/settings/hooks](https://github.com/organizations/hasura/settings/hooks)
+[https://github.com/organizations/my-org/settings/hooks](https://github.com/organizations/my-org/settings/hooks)
 
-**Add this webhook:**
-
+**Add webhook:**
+Set this URL as a webhook that can listen to changes on repos and issues.
 `https://app.clusterName.hasura-app.io/webhook`
+
+**Note:** Replace `my-org` and `clusterName` with the right values.
 
 **Test it out:**
 
