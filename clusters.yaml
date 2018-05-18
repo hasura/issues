@@ -16,4 +16,4 @@ clusters:
       size: 1
     - name: sessionstore
       size: 1
-
+version: v1
