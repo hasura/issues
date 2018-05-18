@@ -25,12 +25,14 @@ This might take 10-15mins and will create a cluster named something like `adore4
 
 ### Step 3a: Setup the github token secret
 
-**Create a token**
+**Create a github token**
+
 Grab your github token from https://github.com/settings/tokens. 
 Create a token that has read access to your orgs/repos.
 Let's say the token is `123whatamagicalsecret789`.
 
 **Set up a secret**
+
 Setup the [secret](https://docs.hasura.io/0.15/manual/project/secrets/index.html) on your cluster: 
 
 ```
