@@ -1,6 +1,6 @@
 import os
 from src import app
-from flask import request, Response
+from flask import request, Response, render_template
 # from flask import jsonify
 import requests, json
 import time, datetime
@@ -8,6 +8,10 @@ import time, datetime
 ORG=os.getenv('GITHUB_ORG')
 TOKEN=os.getenv('GITHUB_TOKEN')
 headers = {'Authorization': 'token ' + TOKEN}
+
+@app.route("/", methods=["GET"])
+def index():
+    return render_template('index.html');
 
 @app.route("/webhook", methods=['POST'])
 def hook():
