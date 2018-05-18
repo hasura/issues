@@ -1,10 +1,12 @@
+# Setup guide
+
 This application consists of metabase, postgres, a webhook microservice, and a cron microservice.
 Going through this guide and setting this up on Hasura should take you about 15-10mins.
 
 Pre-requisites:
-- A [Hasura](hasura.io) account: register/login [here](dashboard.hasura.io/register).
-- Follow the [instructions](dashboard.hasura.io/onboarding) to install and login with the hasura CLI. 
-- Enable [billing](dashboard.hasura.io/billing) on Hasura (the free tier on Hasura will not be able to run metabase).
+- A [Hasura](https://hasura.io) account: register/login [here](https://dashboard.hasura.io/register).
+- Follow the [instructions](https://dashboard.hasura.io/onboarding) to install and login with the hasura CLI. 
+- Enable [billing](https://dashboard.hasura.io/billing) on Hasura (the free tier on Hasura will not be able to run metabase).
 
 ### Step 1: Fork & clone this repo
 
