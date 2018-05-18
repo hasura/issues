@@ -14,7 +14,7 @@ git clone git@github.com:hasura/issues.git
 
 ### Step 2: Create a cluster
 
-This command will create a Hasura cluster (1xCPU, 4GB RAM) in the San Francisco region called hasura. 
+This command will create a Hasura cluster (2xCPU, 4GB RAM) in the San Francisco region.
 Hit `y` when you're asked for confirmation:
 
 ```
@@ -40,6 +40,7 @@ hasura secrets udpate github.token 123whatamagicalsecret789
 ### Step 3b: Setup the github org environment variable
 
 The github org environment variable is in a kubernetes manifest file.
+
 Head to `microservices/app/k8s.yaml` and around Line#30 edit the environment variable called `GITHUB_ORG`:
 ```yaml
 - name: GITHUB_ORG                                                                                       
@@ -55,15 +56,16 @@ git push hasura master
 ```
 
 This might take a few minutes for all the python docker images to build.
+
 Once this is done, to check if everything worked successfully, you can check if the right tables and views got created.
 
 ```
 hasura api-console
 ```
 
-This will open up a browser that is running an admin UI. Head to [localhost:9695/data](localhost:9695/data) 
+This will open up a browser that is running an admin UI. 
+Head to [localhost:9695/data](http://localhost:9695/data) 
 and check if a bunch of tables have gotten created.
-
 
 ### Step 5: Initialise data from your github org
 
@@ -108,12 +110,15 @@ That's it. Once you're logged in, start creating questions and browsing data.
 ### Step 8: Install the webhook on your github account so that you can keep up to date with issues
 
 **Head to your webhooks section on github:**
+
 [https://github.com/organizations/hasura/settings/hooks](https://github.com/organizations/hasura/settings/hooks)
 
 **Add this webhook:**
+
 `https://app.clusterName.hasura-app.io/webhook`
 
 **Test it out:**
+
 Create an issue and head to the issues table and see that it got added.
 The issues table in your API console would be at: [http://localhost:9695/data/schema/tables/issue/browse](http://localhost:9695/data/schema/tables/issue/browse) 
 
