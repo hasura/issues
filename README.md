@@ -4,6 +4,13 @@ Use metabase for project management.
 
 For setup/installation instructions refer to: [Usage guide](guide.md).
 
+
+## How it works
+
+This application initialises github org data and then syncs changes from github using a webhook. All this data in initialised and synced into a postgres database.
+Once data is in postgres, you can use metabase :)
+[!hasura-issues](https://i.imgur.com/IK0TMO7.png)
+
 ### Webhook to upsert issue info
 
 This github webhook will upsert issue info into postgres when issues get created/updated on github:
