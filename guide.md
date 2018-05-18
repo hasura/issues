@@ -6,7 +6,7 @@ Going through this guide and setting this up on Hasura should take you about 15-
 Pre-requisites:
 - A [Hasura](https://hasura.io) account: register/login [here](https://dashboard.hasura.io/register).
 - Follow the [instructions](https://dashboard.hasura.io/onboarding) to install and login with the hasura CLI. 
-- Enable [billing](https://dashboard.hasura.io/billing) on Hasura (the free tier on Hasura will not be able to run metabase).
+- Enable [billing](https://dashboard.hasura.io/account/billing) on Hasura (the free tier on Hasura will not be able to run metabase).
 
 ### Step 1: Fork & clone this repo
 
