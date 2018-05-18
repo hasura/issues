@@ -54,7 +54,7 @@ Head to `microservices/app/k8s.yaml` and around Line#30 edit the environment var
 You're all setup, let's deploy all the microservices and the postgres tables/views to the cluster:
 
 ```
-git push hasura master
+$ git push hasura master
 ```
 
 This might take a few minutes for all the python docker images to build.
@@ -62,7 +62,7 @@ This might take a few minutes for all the python docker images to build.
 Once this is done, to check if everything worked successfully, you can check if the right tables and views got created.
 
 ```
-hasura api-console
+$ hasura api-console
 ```
 
 This will open up a browser that is running an admin UI.
@@ -75,7 +75,7 @@ The `app` microservice running on the cluster has a bunch of APIs that help with
 
 ```bash
 #Open the app microservice URL:
-hasura microservice open app
+$ hasura microservice open app
 ```
 
 This will open up the browser at a URL like: `app.clusterName.hasura-app.io`.
@@ -92,7 +92,7 @@ For example:
 
 Open up the `metabase` microservice:
 ```
-hasura microservice open metabase
+$ hasura microservice open metabase
 ```
 
 Metabase takes a while to startup, so if you see a 502/504 for a minute or two, don't panic.
