@@ -39,11 +39,6 @@ https://app.cluster.hasura-app.io/<repo>/sync_issues
 
 You need to call this API for each repo in the `repo` table.
 
-You can also initialize all the issues of all the repos. Use this API:
-
-```http
-GET https://app.cluster.hasura-app.io/sync_all_repos
-```
 -----------------------------------------------------------
 
 ## Assumptions:
