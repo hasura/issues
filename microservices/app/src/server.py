@@ -157,29 +157,6 @@ def sync_issues(repo):
 
     return Response(generate(url), mimetype='text/plain')
 
-@app.route('/sync_all_repos', methods=['GET'])
-def syncAll():
-    # Get the list of repos
-    url = 'http://data.hasura/v1/query'
-    body = {
-        'type': 'select',
-        'args': {
-            'table': 'repo',
-            'columns': ["name"]
-        }
-    }
-    r = requests.post(url, data=json.dumps(body))
-    if (r.status_code != 200):
-        return "Unexpected."
-    repoList = r.json()
-    if (len(repoList) < 1):
-        return "Please sync the repos and users first."
-    # Sync issues for each repo
-    for repo in repoList:
-        print ("Syncing issues for: " + repo["name"])
-        sync_issues(repo["name"])
-    return "\n\nDone!"
-
 @app.route('/save_snapshot')
 def save_pulse():
     # Get metrics at exactly this point
