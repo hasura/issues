@@ -2,8 +2,11 @@
 Github hooks + sync APIs that load issue data into postgres.
 Use metabase for project management.
 
+For setup/installation instructions refer to: [Usage guide](guide.md).
+
 ### Webhook to upsert issue info
-This github webhook will upsert issue info:
+
+This github webhook will upsert issue info into postgres when issues get created/updated on github:
 
 ```http
 GET
