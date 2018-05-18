@@ -157,7 +157,7 @@ def sync_issues(repo):
 
     return Response(generate(url), mimetype='text/plain')
 
-@app.route('/sync_all_repos' methods=['GET'])
+@app.route('/sync_all_repos', methods=['GET'])
 def syncAll():
     # Get the list of repos
     url = 'http://data.hasura/v1/query'
