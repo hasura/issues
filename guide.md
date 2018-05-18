@@ -1,4 +1,4 @@
-This application consists of metabase, postgres, a webhook microservice, and a cron microservice. 
+This application consists of metabase, postgres, a webhook microservice, and a cron microservice.
 Going through this guide and setting this up on Hasura should take you about 15-10mins.
 
 Pre-requisites:
@@ -9,7 +9,7 @@ Pre-requisites:
 ### Step 1: Fork & clone this repo
 
 ```
-git clone git@github.com:hasura/issues.git
+$ git clone git@github.com:hasura/issues.git
 ```
 
 ### Step 2: Create a cluster
@@ -18,7 +18,7 @@ This command will create a Hasura cluster (2xCPU, 4GB RAM) in the San Francisco 
 Hit `y` when you're asked for confirmation:
 
 ```
-hasura cluster create -c hasura
+$ hasura cluster create -c hasura
 ```
 
 This might take 10-15mins and will create a cluster named something like `adore48`.
@@ -27,16 +27,16 @@ This might take 10-15mins and will create a cluster named something like `adore4
 
 **Create a github token**
 
-Grab your github token from https://github.com/settings/tokens. 
+Grab your github token from https://github.com/settings/tokens.
 Create a token that has read access to your orgs/repos.
 Let's say the token is `123whatamagicalsecret789`.
 
 **Set up a secret**
 
-Setup the [secret](https://docs.hasura.io/0.15/manual/project/secrets/index.html) on your cluster: 
+Setup the [secret](https://docs.hasura.io/0.15/manual/project/secrets/index.html) on your cluster:
 
 ```
-hasura secrets udpate github.token 123whatamagicalsecret789
+$ hasura secrets update github.token 123whatamagicalsecret789
 ```
 
 ### Step 3b: Setup the github org environment variable
@@ -65,8 +65,8 @@ Once this is done, to check if everything worked successfully, you can check if 
 hasura api-console
 ```
 
-This will open up a browser that is running an admin UI. 
-Head to [localhost:9695/data](http://localhost:9695/data) 
+This will open up a browser that is running an admin UI.
+Head to [localhost:9695/data](http://localhost:9695/data)
 and check if a bunch of tables have gotten created.
 
 ### Step 5: Initialise data from your github org
@@ -84,7 +84,7 @@ Click on the API calls mentioned on the page to start initialising your data.
 Once you do this and head back to the api-console you'll see that the tables now have data.
 
 For example:
-[http://localhost:9695/data/schema/tables/member/browse](http://localhost:9695/data/schema/tables/member/browse) 
+[http://localhost:9695/data/schema/tables/member/browse](http://localhost:9695/data/schema/tables/member/browse)
 
 *insert image here*
 
@@ -101,7 +101,7 @@ Once you see the metabase setup screen, these are the important values you need 
 - host: `postgres.hasura`
 - port: `5432`
 - username: `admin`
-- password: Get the password by running `hasura secrets ls` and you'll see an entry called `postgres.password`. 
+- password: Get the password by running `hasura secrets ls` and you'll see an entry called `postgres.password`.
 - database: `hasuradb`
 
 ### Step 7: Create metabase questions
@@ -124,7 +124,7 @@ Set this URL as a webhook that can listen to changes on repos and issues.
 **Test it out:**
 
 Create an issue and head to the issues table and see that it got added.
-The issues table in your API console would be at: [http://localhost:9695/data/schema/tables/issue/browse](http://localhost:9695/data/schema/tables/issue/browse) 
+The issues table in your API console would be at: [http://localhost:9695/data/schema/tables/issue/browse](http://localhost:9695/data/schema/tables/issue/browse)
 
 
 -----------
