@@ -92,7 +92,7 @@ This will open up a browser that is running an admin UI.
 Head to [localhost:9695/data](http://localhost:9695/data)
 and check if a bunch of tables have gotten created.
 
-![Tables in postgres](../images/tables.png)
+![Tables in postgres](images/tables.png)
 
 ### Step 5: Initialise data from your github org
 
@@ -112,7 +112,7 @@ Once you do this and head back to the api-console you'll see that the tables now
 For example:
 [http://localhost:9695/data/schema/tables/member/browse](http://localhost:9695/data/schema/tables/member/browse)
 
-![Members in postgres](../images/members.png)
+![Members in postgres](images/members.png)
 
 ### Step 6: Initialise metabase
 
@@ -131,7 +131,7 @@ Once you see the metabase setup screen, these are the important values you need 
 - password: Get the password by running `hasura secrets ls` and you'll see an entry called `postgres.password`.
 - database: `hasuradb`
 
-![metabase setup](../images/metabase-setup.png)
+![metabase setup](images/metabase-setup.png)
 
 ### Step 7: Create metabase questions
 
