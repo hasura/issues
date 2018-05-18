@@ -2,9 +2,9 @@ This application consists of metabase, postgres, a webhook microservice, and a c
 Going through this guide and setting this up on Hasura should take you about 15-10mins.
 
 Pre-requisites:
-- A Hasura account
-- The hasura CLI
-- Enable billing on Hasura (the free tier on Hasura will not be able to run metabase ☹️)
+- A [Hasura](hasura.io) account: register/login [here](dashboard.hasura.io/register).
+- Follow the [instructions](dashboard.hasura.io/onboarding) to install and login with the hasura CLI. 
+- Enable billing on Hasura (the free tier on Hasura will not be able to run metabase).
 
 ### Step 1: Fork & clone this repo
 
@@ -125,14 +125,3 @@ Set this URL as a webhook that can listen to changes on repos and issues.
 
 Create an issue and head to the issues table and see that it got added.
 The issues table in your API console would be at: [http://localhost:9695/data/schema/tables/issue/browse](http://localhost:9695/data/schema/tables/issue/browse)
-
-
------------
-
-## Advanced
-
-### Add your own tables / views
-
-### Add your own cron
-
-### Creating a Hasura cluster with a different configuration or region
