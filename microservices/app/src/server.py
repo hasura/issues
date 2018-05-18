@@ -170,8 +170,10 @@ def syncAll():
     }
     r = requests.post(url, data=json.dumps(body))
     if (r.status_code != 200):
-        return "Please add the repos first."
+        return "Unexpected."
     repoList = r.json()
+    if (len(repoList) < 1):
+        return "Please sync the repos and users first."
     # Sync issues for each repo
     for repo in repoList:
         print ("Syncing issues for: " + repo["name"])
