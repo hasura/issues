@@ -2,10 +2,6 @@ clusters:
 - alias: hasura
   data: null
   infra:
-    provider: hasura-free
-- alias: new
-  data: null
-  infra:
     nodes:
     - labels:
         app: postgres

@@ -1,0 +1,12 @@
+- args:
+    sql: |+
+      COMMENT ON TABLE issue IS 'Capture an issue object as is from a github repo.';
+      COMMENT ON TABLE member IS 'Members of github org';
+      COMMENT ON TABLE repo IS 'Repos of github org';
+      COMMENT ON VIEW member_issues IS 'View to see per member assigned issue. Join member and issue such that issue.assigned contains the member.';
+      COMMENT ON VIEW closing_rate IS 'View to see average number of days members take to close an issue from when it was created';
+      COMMENT ON TABLE metrics_snapshots IS 'Daily snapshots to capture some specific metrics. Key-value table that gets populated with a cronjob.';
+      COMMENT ON VIEW unassigned_issues IS 'View to see unassigned issues.';
+      COMMENT ON VIEW workload IS 'View to get a sense of workload per member. Basically number of open issues x closing-rate (no of days it takes to close an issue).';
+
+  type: run_sql
