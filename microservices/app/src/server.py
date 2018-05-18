@@ -9,9 +9,33 @@ ORG=os.getenv('GITHUB_ORG')
 TOKEN=os.getenv('GITHUB_TOKEN')
 headers = {'Authorization': 'token ' + TOKEN}
 
-@app.route("/", methods=["GET"])
+@app.route('/', methods=['GET'])
 def index():
     return render_template('index.html');
+
+@app.route('/sync_all_repos' methods=['GET'])
+def syncAll():
+    # Get the list of repos
+    url = 'http://data.hasura/v1/query'
+    body = {
+        'type': 'select',
+        'args': {
+            'table': 'repo',
+            'columns': ["name"]
+        }
+    }
+    r = requests.post(url, data=json.dumps((body))
+    if (r.status_code != 200):
+        return "Please add the repos first."
+    repoList = r.json()
+    # Sync issues for each repo
+    for repo in repoList:
+        r = requests.get("http://app.default/" + repo.name + "/sync_issues")
+        if (r.status_code != 200):
+            print ("Unable to sync issues for " + repo.name)
+        print ("Synced issues for: "+ repo.name)
+
+    return None
 
 @app.route("/webhook", methods=['POST'])
 def hook():
