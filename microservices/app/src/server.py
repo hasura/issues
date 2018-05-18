@@ -169,7 +169,7 @@ def syncAll():
         }
     }
     r = requests.post(url, data=json.dumps((body))
-    if (r.status_code != 200):
+    if r.status_code != 200:
         return "Please add the repos first."
     repoList = r.json()
     # Sync issues for each repo
