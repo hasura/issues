@@ -174,8 +174,8 @@ def syncAll():
     repoList = r.json()
     # Sync issues for each repo
     for repo in repoList:
-        print ("Syncing issues for: " + repo.name)
-        sync_issues(repo.name)
+        print ("Syncing issues for: " + repo["name"])
+        sync_issues(repo["name"])
     return "\n\nDone!"
 
 @app.route('/save_snapshot')
