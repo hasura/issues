@@ -1,5 +1,5 @@
 This application consists of metabase, postgres, a webhook microservice, and a cron microservice. 
-You can deploy this entire application on a Hasura cluster.
+Going through this guide and setting this up on Hasura should take you about 15-10mins.
 
 Pre-requisites:
 - A Hasura account
